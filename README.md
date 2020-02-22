@@ -1,10 +1,10 @@
 # CS 174A Final Project
 
 ## Team members:  
-Brian Won
-Marie Chu
-Tony Youn
-Yijing Zhou 
+Brian Won  
+Marie Chu  
+Tony Youn  
+Yijing Zhou  
 
 ## Schedule:
 
