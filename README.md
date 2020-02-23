@@ -1,9 +1,9 @@
 # CS 174A Final Project
 
 ## Team members:  
-Brian Won  
+Su Yong Won  
 Marie Chu  
-Tony Youn  
+Changhui Youn  
 Yijing Zhou  
 
 ## Schedule:
@@ -14,7 +14,7 @@ Mirror team:
 Marie Chu & Yijing Zhou
 
 Darts team:
-Brain Won & Tony Youn
+Su Yong Won & Changhui Youn
 
 *Objectives of the first sprint*: 
 - objects creation
