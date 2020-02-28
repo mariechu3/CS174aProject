@@ -23,36 +23,33 @@ window.Mirror_Scene= window.classes.Mirror_Scene =
 
                 // TODO:  Fill in as many additional shape instances as needed in this key/value table.
                 //        (Requirement 1)
-                sphere1: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(1),
-                sphere2: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
-                sphere3: new Subdivision_Sphere(3),
-                sphere4: new Subdivision_Sphere(4),
-                sphere5: new (Grid_Sphere.prototype.make_flat_shaded_version())(10,10),
-                box: new Cube(),
-                mirror: new Plane_Mirror(50,50)
+                sphere: new Subdivision_Sphere(4),
+                box: new Cube_2(),
+                mirror: new Mirror(50,50),
+                frame: new Frame(50,50),
+                spike: new SpikeBall(15,15,[2,2]),
+                square: new Square()
+
             };
             this.submit_shapes(context, shapes);
 
             // Make some Material objects available to you:
             this.materials =
                 {
-                    avatar: context.get_instance(Phong_Shader).material(Color.of(0,0,1,1), {ambient: 0.0}),
-                    wall: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1}),
-                    mirror: context.get_instance(Phong_Shader).material(Color.of(.95,1,.95,1), {ambient:0.05, diffusivity: 0})
+                    avatar: context.get_instance(Phong_Shader).material(Color.of(0,0,1,1), {ambient: 0.1}),
+                    wall: context.get_instance(Phong_Shader).material(Color.of(.8,.9,1,1), {ambient: 1}),
+                    mirror: context.get_instance(Phong_Shader).material(Color.of(.95,1,.95,1), {ambient:0.1, diffusivity: 0}),
+                    floor: context.get_instance (Phong_Shader).material( Color.of (0,0,0,1), {ambient: 0.3, texture: context.get_instance("assets/tile.jpg",true)}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
                            new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
                            new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-                           new Light(Vec.of(0, 8, 30, 1), Color.of(1, 1, 1, 1), 1000),
-                           new Light(Vec.of(0, 8, -30, 1), Color.of(1, 1, 1, 1), 1000)];
+                           new Light(Vec.of(0, 0, 20, 1), Color.of(1, 1, 1, 1), 1000),
+                           new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)];
 
-            this.move_r_pressed = false;
-            this.move_l_pressed = false;
-            this.move_u_pressed = false;
-            this.move_d_pressed = false;
-            this.move_f_pressed = false;
-            this.move_b_pressed = false;
+            this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
+                this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
         }
         set_pos(dir)
         {
@@ -60,8 +57,10 @@ window.Mirror_Scene= window.classes.Mirror_Scene =
                 this.avatar_pos=this.avatar_pos.times(Mat4.translation([-.5,0,0]));
             else if(dir==2)
                 this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,.5,0]));
-            else if(dir==3)
-                this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,-.5,0]));
+            else if(dir==3) {
+                if (this.avatar_pos[1][3] > -4.5)
+                    this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, -.5, 0]));
+            }
             else if(dir==4) {
                 if(this.avatar_pos[2][3]>1.0)
                     this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, -.5]));
@@ -70,25 +69,16 @@ window.Mirror_Scene= window.classes.Mirror_Scene =
                 this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,0,.5]));
             else
                 this.avatar_pos=this.avatar_pos.times(Mat4.translation([.5,0,0]));
-            console.log(this.avatar_pos[0]);
-            console.log(this.avatar_pos[1]);
-            console.log(this.avatar_pos[2]);
-            console.log(this.avatar_pos[3]);
-            console.log("n");
-            this.move_l_pressed = false;
-            this.move_r_pressed = false;
-            this.move_u_pressed = false;
-            this.move_d_pressed = false;
-            this.move_f_pressed = false;
-            this.move_b_pressed = false;
 
+            this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
+                this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
         }
 
         make_control_panel() {
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
 
-            this.key_triggered_button("Move Avatar Right", ["4"], () => {this.move_r_pressed = true});
-            this.key_triggered_button("Move Avatar Left", ["5"], () => {this.move_l_pressed = true});
+            this.key_triggered_button("Move Avatar Left", ["4"], () => {this.move_l_pressed = true});
+            this.key_triggered_button("Move Avatar Right", ["5"], () => {this.move_r_pressed = true});
             this.new_line();
             this.key_triggered_button("Move Avatar Up", ["6"], () => {this.move_u_pressed = true});
             this.key_triggered_button("Move Avatar Down", ["7"], () => {this.move_d_pressed = true});
@@ -107,19 +97,29 @@ window.Mirror_Scene= window.classes.Mirror_Scene =
             this.key_triggered_button("Attach to avatar 4", ["a"], () => this.attached = () => this.avatar_pos);
             this.new_line();
         }
-
-        display(graphics_state) {
-            graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
-            const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+        setupScene(graphics_state)
+        {
             let identity = Mat4.identity();
-            // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 2 and 3)
             this.mirror_1 = identity.times(Mat4.scale([.25,.5,.05]));
             this.shapes.mirror.draw(graphics_state,this.mirror_1,this.materials.mirror);
             this.mirror_2 = identity.times(Mat4.translation([-10,0,0])).times(Mat4.scale([.25,.5,.05]));
             this.shapes.mirror.draw(graphics_state,this.mirror_2,this.materials.mirror);
             this.mirror_3 = identity.times(Mat4.translation([10,0,0])).times(Mat4.scale([.25,.5,.05]));
             this.shapes.mirror.draw(graphics_state,this.mirror_3,this.materials.mirror);
-            //this.shapes.box.draw(graphics_state,identity.times(Mat4.scale([100,100,.05])),this.materials.wall);
+            this.shapes.box.draw(graphics_state,identity.times(Mat4.translation([0,-15,0])).times(Mat4.scale([50,12,50])),this.materials.floor);
+            //needs to be fixed for collisions/actually have some way to just have a wall with holes in it
+            this.shapes.frame.draw(graphics_state,this.mirror_1.times(Mat4.scale([1.5,1.5,1.5])),this.materials.wall);
+            this.shapes.frame.draw(graphics_state,this.mirror_2.times(Mat4.scale([1.5,1.5,1.5])),this.materials.wall);
+            this.shapes.frame.draw(graphics_state,this.mirror_3.times(Mat4.scale([1.5,1.5,1.5])),this.materials.wall);
+            this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([-5,4,0])).times(Mat4.scale([2.5,10,1])),this.materials.wall);
+            this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([5,4,0])).times(Mat4.scale([2.5,10,1])),this.materials.wall);
+            this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([-30,4,0])).times(Mat4.scale([17.5,10,1])),this.materials.wall);
+            this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([30,4,0])).times(Mat4.scale([17.5,10,1])),this.materials.wall);
+            this.shapes.box.draw(graphics_state,identity.times(Mat4.translation([0,34.2,0])).times(Mat4.scale([50,30,.05])),this.materials.wall);
+
+        }
+        movement()
+        {
             // movement of avatar
             if(this.move_r_pressed)
                 this.set_pos(0);
@@ -133,27 +133,58 @@ window.Mirror_Scene= window.classes.Mirror_Scene =
                 this.set_pos(4);
             else if(this.move_b_pressed)
                 this.set_pos(5);
+        }
+        mirror_eq(focus,obj_dist)
+        {
+            return (obj_dist*focus)/(obj_dist-focus);
+        }
 
-            this.shapes.sphere4.draw(graphics_state,this.avatar_pos,this.materials.avatar);
+        display(graphics_state) {
+            graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
+            const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+            let identity = Mat4.identity();
+            this.setupScene(graphics_state);
+            this.movement();
+
+            //draw avatar
+            this.shapes.spike.draw(graphics_state,this.avatar_pos,this.materials.avatar);
+
+            //draw reflected cases
             //plane mirror
-            let copy = this.avatar_pos.times(Mat4.scale([.5,.5,.5]));
-            let reflected_mat = [this.avatar_pos[0],
-                               this.avatar_pos[1],
-                              [-1*this.avatar_pos[2][0],-1*this.avatar_pos[2][1],-1*this.avatar_pos[2][2],-1*this.avatar_pos[2][3]],
-                               this.avatar_pos[3]];
-            //plane mirror
+            let copy = this.avatar_pos;
+            let scale = 1;
+            let reflected_mat = [copy[0], copy[1], [-1*copy[2][0],-1*copy[2][1],-1*copy[2][2],-1*copy[2][3]], copy[3]];
             if(this.avatar_pos[0][3]>= -4 && this.avatar_pos[0][3] <= 4)
-                this.shapes.sphere4.draw(graphics_state,reflected_mat,this.materials.avatar);
-            //convex + concave just have placeholder scalars for now, do the actual physical simulation later
-            reflected_mat = [copy[0],
-                copy[1],
-                [-1*copy[2][0],-1*copy[2][1],-1*copy[2][2],-1*copy[2][3]],
-                copy[3]];
-            if(this.avatar_pos[0][3]<-4)
-                this.shapes.sphere4.draw(graphics_state,reflected_mat,this.materials.avatar);
-
-            if(this.avatar_pos[0][3]> 4) {
-                this.shapes.sphere4.draw(graphics_state,reflected_mat, this.materials.avatar);
+                this.shapes.spike.draw(graphics_state,reflected_mat,this.materials.avatar);
+            //convex case will always be upright
+            else if(this.avatar_pos[0][3]<-4) {
+                scale = (-1*this.mirror_eq(-3,this.avatar_pos[2][3])/this.avatar_pos[2][3]);
+                copy = this.avatar_pos.times(Mat4.scale([scale,scale,scale]));
+                reflected_mat = [copy[0], copy[1], [-1*copy[2][0],-1*copy[2][1],-1*copy[2][2],-1*copy[2][3]], copy[3]];
+                this.shapes.spike.draw(graphics_state, reflected_mat, this.materials.avatar);
+            }
+            //concave cases
+            else if(this.avatar_pos[0][3]> 4) {
+                //if needs to be inverted
+                if(this.mirror_eq(3,this.avatar_pos[2][3])>0) {
+                    scale = (this.mirror_eq(2, this.avatar_pos[2][3]) / this.avatar_pos[2][3]);
+                    console.log(scale);
+                    copy = this.avatar_pos.times(Mat4.scale([scale, scale, scale]));
+                    reflected_mat = [copy[0],
+                        [-1 * copy[1][0], -1 * copy[1][1], -1 * copy[1][2], -1 * copy[1][3]],
+                        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
+                        copy[3]];
+                }
+                else
+                {
+                    scale = (-1 * this.mirror_eq(3, this.avatar_pos[2][3]) / this.avatar_pos[2][3]);
+                    copy = this.avatar_pos.times(Mat4.scale([scale, scale, scale]));
+                    reflected_mat = [copy[0],
+                        copy[1],
+                        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
+                        copy[3]];
+                }
+                this.shapes.spike.draw(graphics_state,reflected_mat, this.materials.avatar);
             }
 
 

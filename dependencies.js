@@ -37,7 +37,7 @@ window.Square_2 = window.classes.Square_2 =
       { super( "positions", "normals", "texture_coords" );                                   // Name the values we'll define per each vertex.
         this.positions     .push( ...Vec.cast( [-1,-1,0], [1,-1,0], [-1,1,0], [1,1,0] ) );   // Specify the 4 square corner locations.
         this.normals       .push( ...Vec.cast( [0,0,1],   [0,0,1],  [0,0,1],  [0,0,1] ) );   // Match those up with normal vectors.
-        this.texture_coords.push( ...Vec.cast( [0,0],     [2,0],    [0,2],    [2,2]   ) );   // Draw a square in texture coordinates too.
+        this.texture_coords.push( ...Vec.cast( [0,0],     [15,0],    [0,15],    [15,15]   ) );   // Draw a square in texture coordinates too.
         this.indices       .push( 0, 1, 2,     1, 3, 2 );                   // Two triangles this time, indexing into four distinct vertices.
       }
     }
@@ -281,12 +281,24 @@ class Torus extends Shape                                         // Build a don
         Surface_Of_Revolution.insert_transformed_copy_into( this, [ rows, columns, circle_points ] );         
       }
   }
-window.Plane_Mirror = window.classes.Plane_Mirror =
-    class Plane_Torus extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+window.Mirror = window.classes.Mirror =
+    class Mirror extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor( rows, columns )
     { super( "positions", "normals", "texture_coords" );
       const circle_points = Array( rows ).fill( Vec.of( .75,0,0 ) )
           .map( (p,i,a) => Mat4.translation([ -10,0,0 ])
+              .times( Mat4.rotation( i/(a.length-1) * 2*Math.PI, Vec.of( 0,-1,0 ) ) )
+              .times( p.to4(1) ).to3() );
+
+      Surface_Of_Revolution.insert_transformed_copy_into( this, [ rows, columns, circle_points ] );
+    }
+    }
+window.Frame = window.classes.Frame =
+    class Frame extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( rows, columns )
+    { super( "positions", "normals", "texture_coords" );
+      const circle_points = Array( rows ).fill( Vec.of( .75,0,0 ) )
+          .map( (p,i,a) => Mat4.translation([ -8,0,0 ])
               .times( Mat4.rotation( i/(a.length-1) * 2*Math.PI, Vec.of( 0,-1,0 ) ) )
               .times( p.to4(1) ).to3() );
 
@@ -298,12 +310,12 @@ window.SpikeBall = window.classes.SpikeBall =
     class SpikeBall extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor( rows, columns, texture_range )
     { super( "positions", "normals", "texture_coords" );
-    for(var i = 0; i < 4; i++) {
-      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*i) / 2, Vec.of(0, 1, 0)).times(Mat4.translation([0,0,1])));
+    for(var i = 0; i < 2; i++) {
+      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*i) / 2, Vec.of(0, 1, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
     }
-      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])));
-      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*3) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])));
-      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.75,.75,.75]));
+      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
+      //Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*3) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])));
+      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.65,.65,.65]));
     }
     }
 
