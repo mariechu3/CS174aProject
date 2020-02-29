@@ -218,3 +218,114 @@ window.Mirror_Scene= window.classes.Mirror_Scene =
         }
     };
 
+
+window.Dart_Scene= window.classes.Dart_Scene =
+    class Dart_Scene extends Scene_Component {
+        constructor(context, control_box)
+        {
+            // The scene begins by requesting the camera, shapes, and materials it will need.
+            super(context, control_box);
+            // First, include a secondary Scene that provides movement controls:
+            if (!context.globals.has_controls)
+                context.register_scene_component(new Movement_Controls(context, control_box.parentElement.insertCell()));
+
+            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 5, 30), Vec.of(0, 0, 0), Vec.of(0, 1, 0));
+            this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
+
+            this.initial_avatar_location = Mat4.identity().times(Mat4.translation([0,0,5]));
+            this.avatar_pos = this.initial_avatar_location;
+
+            const r = context.width / context.height;
+            context.globals.graphics_state.projection_transform = Mat4.perspective(Math.PI / 4, r, .1, 1000);
+
+            const shapes = {
+                torus: new Torus(15, 15),
+                torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
+
+                cylinder: new Rounded_Capped_Cylinder(15,15,[2,2]),
+
+            };
+            this.submit_shapes(context, shapes);
+
+            // Make some Material objects available to you:
+            this.materials =
+                {
+                    avatar: context.get_instance(Phong_Shader).material(Color.of(0,0,1,1), {ambient: 0.1}),
+                    wall: context.get_instance(Phong_Shader).material(Color.of(.8,.9,1,1), {ambient: 1}),
+                    mirror: context.get_instance(Phong_Shader).material(Color.of(.95,1,.95,1), {ambient:0.1, diffusivity: 0}),
+                    floor: context.get_instance (Phong_Shader).material( Color.of (0,0,0,1), {ambient: 0.3, texture: context.get_instance("assets/tile.jpg",true)}),
+                };
+
+            this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
+                           new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
+                           new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
+                           new Light(Vec.of(0, 0, 20, 1), Color.of(1, 1, 1, 1), 1000),
+                           new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)];
+
+            this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
+                this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
+        }
+        set_pos(dir)
+        {
+            if(dir==1)
+                this.avatar_pos=this.avatar_pos.times(Mat4.translation([-.5,0,0]));
+            else if(dir==2)
+                this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,.5,0]));
+            else if(dir==3) {
+                if (this.avatar_pos[1][3] > -4.5)
+                    this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, -.5, 0]));
+            }
+            else if(dir==4) {
+                if(this.avatar_pos[2][3]>1.0)
+                    this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, -.5]));
+            }
+            else if(dir==5)
+                this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,0,.5]));
+            else
+                this.avatar_pos=this.avatar_pos.times(Mat4.translation([.5,0,0]));
+
+            this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
+                this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
+        }
+
+        make_control_panel() {
+            // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
+
+            this.key_triggered_button("Move Avatar Left", ["4"], () => {this.move_l_pressed = true});
+            this.key_triggered_button("Move Avatar Right", ["5"], () => {this.move_r_pressed = true});
+            this.new_line();
+            this.key_triggered_button("Move Avatar Up", ["6"], () => {this.move_u_pressed = true});
+            this.key_triggered_button("Move Avatar Down", ["7"], () => {this.move_d_pressed = true});
+            this.new_line();
+            this.key_triggered_button("Move Avatar Forward", ["8"], () => {this.move_f_pressed = true});
+            this.key_triggered_button("Move Avatar Back", ["9"], () => {this.move_b_pressed = true});
+            this.new_line();
+            this.new_line();
+            this.new_line();
+            this.key_triggered_button("View whole scene", ["0"], () => this.attached = () => this.initial_camera_location);
+            this.new_line();
+            this.key_triggered_button("Attach to mirror 1", ["1"], () => this.attached = () => this.mirror_1);
+            this.key_triggered_button("Attach to mirror 2", ["2"], () => this.attached = () => this.mirror_2);
+            this.new_line();
+            this.key_triggered_button("Attach to mirror 3", ["3"], () => this.attached = () => this.mirror_3);
+            this.key_triggered_button("Attach to avatar 4", ["a"], () => this.attached = () => this.avatar_pos);
+            this.new_line();
+        }
+
+        display(graphics_state) {
+            graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
+            const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+
+            // Create Cylinder
+
+
+            let identity = Mat4.identity();
+
+            //draw avatar
+            this.shapes.cylinder.draw(graphics_state,this.avatar_pos,this.materials.avatar);
+
+
+        }
+    };
+
+
