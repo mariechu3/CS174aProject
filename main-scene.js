@@ -371,30 +371,30 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             let transform = Mat4.identity();
 
-            // const angle = Math.PI / 4;
-            // const V = 20;
-            // const g = 9.8;
+            const angle = Math.PI / 4;
+            const V = 20;
+            const g = 9.8;
 
-            // let Vx = V * Math.cos(angle);
-            // let Vy = V * Math.sin(angle);
+            let Vx = V * Math.cos(angle);
+            let Vy = V * Math.sin(angle);
 
-            // let X = Vx * t;
-            // let Y = Vy * t - g * t*t/2;
+            let X = Vx * t;
+            let Y = Vy * t - g * t*t/2;
 
-            // let cur_angle = Math.atan(Y/X);
+            let cur_angle = Math.atan(Y/X);
 
-            // transform = transform.times(Mat4.translation([X,Y,0]));
-            // transform = transform.times(Mat4.translation([-20,0,0]));
-            // transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1))).times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([-20,0,0]));
+            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1))).times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
 
-            // this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
             transform = Mat4.identity();
 
-            // transform = transform.times(Mat4.translation([20,0,0]));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.translation([20,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
 
-            transform = transform.times(Mat4.scale([10,10,1]));
+            // transform = transform.times(Mat4.scale([10,10,1]));
 
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
