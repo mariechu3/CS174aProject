@@ -243,6 +243,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
                 bar: new Cube(),
                 cylinder: new Rounded_Capped_Cylinder(15,15,[2,2]),
+                sun: new Subdivision_Sphere(4),
             };
             this.submit_shapes(context, shapes);
 
@@ -254,6 +255,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     mirror: context.get_instance(Phong_Shader).material(Color.of(.95,1,.95,1), {ambient:0.1, diffusivity: 0}),
                     floor: context.get_instance (Phong_Shader).material( Color.of (0,0,0,1), {ambient: 0.3, texture: context.get_instance("assets/tile.jpg",true)}),
                     bar: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1}),
+                    dart: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -277,28 +279,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.angle_up_start = false;
             this.angle_down_start = false;
 
-        }
-        set_pos(dir)
-        {
-            if(dir==1)
-                this.avatar_pos=this.avatar_pos.times(Mat4.translation([-.5,0,0]));
-            else if(dir==2)
-                this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,.5,0]));
-            else if(dir==3) {
-                if (this.avatar_pos[1][3] > -4.5)
-                    this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, -.5, 0]));
-            }
-            else if(dir==4) {
-                if(this.avatar_pos[2][3]>1.0)
-                    this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, -.5]));
-            }
-            else if(dir==5)
-                this.avatar_pos=this.avatar_pos.times(Mat4.translation([0,0,.5]));
-            else
-                this.avatar_pos=this.avatar_pos.times(Mat4.translation([.5,0,0]));
-
-            this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
-                this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
         }
 
         make_control_panel() {
@@ -388,11 +368,36 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.set_bar_transform();
 
             this.shapes.bar.draw(graphics_state, this.bar_transform, this.materials.bar);
-            // Create Cylinder
-            
-            let identity = Mat4.identity();
-            //draw avatar
-            this.shapes.cylinder.draw(graphics_state,this.avatar_pos,this.materials.avatar);
+
+            let transform = Mat4.identity();
+
+            // const angle = Math.PI / 4;
+            // const V = 20;
+            // const g = 9.8;
+
+            // let Vx = V * Math.cos(angle);
+            // let Vy = V * Math.sin(angle);
+
+            // let X = Vx * t;
+            // let Y = Vy * t - g * t*t/2;
+
+            // let cur_angle = Math.atan(Y/X);
+
+            // transform = transform.times(Mat4.translation([X,Y,0]));
+            // transform = transform.times(Mat4.translation([-20,0,0]));
+            // transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1))).times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+
+            // this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+
+            transform = Mat4.identity();
+
+            // transform = transform.times(Mat4.translation([20,0,0]));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+
+            transform = transform.times(Mat4.scale([10,10,1]));
+
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+
         }
     };
 
