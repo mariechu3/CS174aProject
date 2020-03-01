@@ -143,52 +143,58 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     );
     this.new_line();
   }
+
+  draw_middle_mirror_and_frame(graphics_state) {
+    this.mirror_1 = Mat4.identity();
+    const mirror_model = this.mirror_1.times(Mat4.scale([0.25, 0.5, 0.05]));
+    const frame_model = mirror_model.times(Mat4.scale([1.5, 1.5, 1.5]));
+    this.shapes.mirror.draw(
+      graphics_state,
+      mirror_model,
+      this.materials.mirror
+    );
+    // TODO: [WALL_WITH_HOLES] needs to be fixed for collisions/actually have some way to just have a wall with holes in it
+    this.shapes.frame.draw(graphics_state, frame_model, this.materials.wall);
+  }
+
+  draw_left_mirror_and_frame(graphics_state) {
+    this.mirror_2 = Mat4.identity().times(Mat4.translation([-10, 0, 0]));
+    const mirror_model = this.mirror_2.times(Mat4.scale([0.25, 0.5, 0.05]));
+    const frame_model = mirror_model.times(Mat4.scale([1.5, 1.5, 1.5]));
+    this.shapes.mirror.draw(
+      graphics_state,
+      mirror_model,
+      this.materials.mirror
+    );
+    // TODO: [WALL_WITH_HOLES] needs to be fixed for collisions/actually have some way to just have a wall with holes in it
+    this.shapes.frame.draw(graphics_state, frame_model, this.materials.wall);
+  }
+
+  draw_right_mirror_and_frame(graphics_state) {
+    this.mirror_3 = Mat4.identity().times(Mat4.translation([10, 0, 0]));
+    const mirror_model = this.mirror_3.times(Mat4.scale([0.25, 0.5, 0.05]));
+    const frame_model = mirror_model.times(Mat4.scale([1.5, 1.5, 1.5]));
+    this.shapes.mirror.draw(
+      graphics_state,
+      mirror_model,
+      this.materials.mirror
+    );
+    // TODO: [WALL_WITH_HOLES] needs to be fixed for collisions/actually have some way to just have a wall with holes in it
+    this.shapes.frame.draw(graphics_state, frame_model, this.materials.wall);
+  }
+
   setupScene(graphics_state) {
     let identity = Mat4.identity();
-    this.mirror_1 = identity.times(Mat4.scale([0.25, 0.5, 0.05]));
-    this.shapes.mirror.draw(
-      graphics_state,
-      this.mirror_1,
-      this.materials.mirror
-    );
-    this.mirror_2 = identity
-      .times(Mat4.translation([-10, 0, 0]))
-      .times(Mat4.scale([0.25, 0.5, 0.05]));
-    this.shapes.mirror.draw(
-      graphics_state,
-      this.mirror_2,
-      this.materials.mirror
-    );
-    this.mirror_3 = identity
-      .times(Mat4.translation([10, 0, 0]))
-      .times(Mat4.scale([0.25, 0.5, 0.05]));
-    this.shapes.mirror.draw(
-      graphics_state,
-      this.mirror_3,
-      this.materials.mirror
-    );
+    this.draw_middle_mirror_and_frame(graphics_state);
+    this.draw_left_mirror_and_frame(graphics_state);
+    this.draw_right_mirror_and_frame(graphics_state);
+
     this.shapes.box.draw(
       graphics_state,
       identity
         .times(Mat4.translation([0, -15, 0]))
         .times(Mat4.scale([50, 12, 50])),
       this.materials.floor
-    );
-    //needs to be fixed for collisions/actually have some way to just have a wall with holes in it
-    this.shapes.frame.draw(
-      graphics_state,
-      this.mirror_1.times(Mat4.scale([1.5, 1.5, 1.5])),
-      this.materials.wall
-    );
-    this.shapes.frame.draw(
-      graphics_state,
-      this.mirror_2.times(Mat4.scale([1.5, 1.5, 1.5])),
-      this.materials.wall
-    );
-    this.shapes.frame.draw(
-      graphics_state,
-      this.mirror_3.times(Mat4.scale([1.5, 1.5, 1.5])),
-      this.materials.wall
     );
     this.shapes.square.draw(
       graphics_state,
@@ -334,25 +340,11 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
           );
           break;
-        //these don't work, probably because of the scaling
-
         case this.mirror_1:
-          graphics_state.camera_transform = Mat4.inverse(
-            this.mirror_1.times(translate_back)
-          ).map((x, i) =>
-            Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
-          );
-          break;
         case this.mirror_2:
-          graphics_state.camera_transform = Mat4.inverse(
-            this.mirror_2.times(translate_back)
-          ).map((x, i) =>
-            Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
-          );
-          break;
         case this.mirror_3:
           graphics_state.camera_transform = Mat4.inverse(
-            this.mirror_3.times(translate_back)
+            this.attached()
           ).map((x, i) =>
             Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
           );
