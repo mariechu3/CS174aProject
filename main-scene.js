@@ -242,15 +242,17 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 bar: new Cube(),
                 cylinder: new Rounded_Capped_Cylinder(15,15,[2,2]),
                 cone : new Closed_Cone(15, 15, [2,2]),
+                wing: new Cube(),
             };
             this.submit_shapes(context, shapes);
 
             // Make some Material objects available to you:
             this.materials =
                 {
-                    bar: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1}),
-                    dart: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
+                    bar : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1}),
+                    dart : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     cone : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
+                    wing : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -260,12 +262,13 @@ window.Dart_Scene= window.classes.Dart_Scene =
                            new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)];
 
             this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
-                this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
+            this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
 
 
             this.max_power = 100;
             this.power = 0;
             this.charging = false;
+            this.shoot = false;
             this.charging_start_time = 0;
             this.curr_time = 0;
             this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
@@ -311,6 +314,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
         start_charging() {
             console.log("Start charging");
             this.charging = true;
+            this.shoot = false;
             this.charging_start_time = this.curr_time;
         }
 
@@ -318,6 +322,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             console.log("Shoot!");
             console.log(this.power);
             this.charging = false;
+            this.shoot = true;
         }
         angle_up() {
             if (!this.angle_down_start) {
@@ -364,103 +369,126 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             this.shapes.bar.draw(graphics_state, this.bar_transform, this.materials.bar);
 
+
             let transform = Mat4.identity();
 
-            const angle = Math.PI / 4;
-            const V = 50;
+            let angle = Math.PI / 200 * this.angle;
+            let V = this.power;
             const g = 9.8;
 
             let Vx = V * Math.cos(angle);
             let Vy = V * Math.sin(angle);
 
-            let X = Vx * t;
-            let Y = Vy * t - g * t*t/2;
+            let X = 0;
+            let Y = 0;
 
-            let cur_angle = Math.atan(Y/X);
-            if(Y < 0)
-                cur_angle = -Math.atan(Y/X);
+            let cur_angle = angle;
+
+            if(this.shoot){
+                Vx = V * Math.cos(angle);
+                Vy = V * Math.sin(angle);
+
+                X = Vx * t;
+                Y = Vy * t - g * t*t/2;
+
+                cur_angle = Math.atan(Y/X);
+            }
+
 
             
 
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-20,0,0]));
+            transform = transform.times(Mat4.translation([10,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-10,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
 
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-18,0,0]));
-            transform = transform.times(Mat4.translation([-2,0,0]));
+            transform = transform.times(Mat4.translation([8,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([2,0,0]));
+            transform = transform.times(Mat4.translation([-8,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
             transform = transform.times(Mat4.scale([0.5,0.5,4]));
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-17,0,0]));
-            transform = transform.times(Mat4.translation([-3,0,0]));
+            transform = transform.times(Mat4.translation([7,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([3,0,0]));
+            transform = transform.times(Mat4.translation([-7,0,0]));
             transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
             this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
 
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-13,0,0]));
-            transform = transform.times(Mat4.translation([-7,0,0]));
+            transform = transform.times(Mat4.translation([3,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([7,0,0]));
+            transform = transform.times(Mat4.translation([-3,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
             transform = transform.times(Mat4.scale([1,1,6]));
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-11,0,0]));
-            transform = transform.times(Mat4.translation([-9,0,0]));
+            transform = transform.times(Mat4.translation([1,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([9,0,0]));
+            transform = transform.times(Mat4.translation([-1,0,0]));
             transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1.3,1.3,2]));
             this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
 
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-6,0,0]));
-            transform = transform.times(Mat4.translation([-14,0,0]));
+            transform = transform.times(Mat4.translation([-4,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([14,0,0]));
+            transform = transform.times(Mat4.translation([4,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
             transform = transform.times(Mat4.scale([1.3,1.3,6]));
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
             transform = transform.times(Mat4.translation([-1,0,0]));
-            transform = transform.times(Mat4.translation([-19,0,0]));
+            transform = transform.times(Mat4.translation([-9,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([19,0,0]));
+            transform = transform.times(Mat4.translation([9,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1.3,1.3,2]));
             this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
 
             transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-20,0,0]));
+            transform = transform.times(Mat4.translation([X,Y,0]));
+            transform = transform.times(Mat4.translation([-10,0,0]));
             transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([20,0,0]));
+            transform = transform.times(Mat4.translation([10,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1,1,10]));
             this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
+
+            transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([X,Y,0]));
+            // transform = transform.times(Mat4.translation([-20,0,0]));
+            // transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4([2,2,3]);
+            // transform = transform.times(Mat4.scale([2,2,3]));
+            this.shapes.wing.draw(graphics_state, transform, this.materials.wing);
+
             //target
 
             transform = Mat4.identity();
