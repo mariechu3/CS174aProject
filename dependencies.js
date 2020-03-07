@@ -1,3 +1,108 @@
+window.Shape_From_File = window.classes.Shape_From_File =
+class Shape_From_File extends Shape {
+  // **Shape_From_File** is a versatile standalone Shape that imports
+  // all its arrays' data from an .obj 3D model file.
+  constructor(filename) {
+    super("position", "normal", "texture_coord");
+    // Begin downloading the mesh. Once that completes, return
+    // control to our parse_into_mesh function.
+    this.load_file(filename);
+  }
+
+  load_file(filename) {                             // Request the external file and wait for it to load.
+    // Failure mode:  Loads an empty shape.
+    return fetch(filename)
+        .then(response => {
+          if (response.ok) return Promise.resolve(response.text())
+          else return Promise.reject(response.status)
+        })
+        .then(obj_file_contents => this.parse_into_mesh(obj_file_contents))
+        .catch(error => {
+          this.copy_onto_graphics_card(this.gl);
+        })
+  }
+
+  parse_into_mesh(data) {                           // Adapted from the "webgl-obj-loader.js" library found online:
+    var verts = [], vertNormals = [], textures = [], unpacked = {};
+
+    unpacked.verts = [];
+    unpacked.norms = [];
+    unpacked.textures = [];
+    unpacked.hashindices = {};
+    unpacked.indices = [];
+    unpacked.index = 0;
+
+    var lines = data.split('\n');
+
+    var VERTEX_RE = /^v\s/;
+    var NORMAL_RE = /^vn\s/;
+    var TEXTURE_RE = /^vt\s/;
+    var FACE_RE = /^f\s/;
+    var WHITESPACE_RE = /\s+/;
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      var elements = line.split(WHITESPACE_RE);
+      elements.shift();
+
+      if (VERTEX_RE.test(line)) verts.push.apply(verts, elements);
+      else if (NORMAL_RE.test(line)) vertNormals.push.apply(vertNormals, elements);
+      else if (TEXTURE_RE.test(line)) textures.push.apply(textures, elements);
+      else if (FACE_RE.test(line)) {
+        var quad = false;
+        for (var j = 0, eleLen = elements.length; j < eleLen; j++) {
+          if (j === 3 && !quad) {
+            j = 2;
+            quad = true;
+          }
+          if (elements[j] in unpacked.hashindices)
+            unpacked.indices.push(unpacked.hashindices[elements[j]]);
+          else {
+            var vertex = elements[j].split('/');
+
+            unpacked.verts.push(+verts[(vertex[0] - 1) * 3 + 0]);
+            unpacked.verts.push(+verts[(vertex[0] - 1) * 3 + 1]);
+            unpacked.verts.push(+verts[(vertex[0] - 1) * 3 + 2]);
+
+            if (textures.length) {
+              unpacked.textures.push(+textures[((vertex[1] - 1) || vertex[0]) * 2 + 0]);
+              unpacked.textures.push(+textures[((vertex[1] - 1) || vertex[0]) * 2 + 1]);
+            }
+
+            unpacked.norms.push(+vertNormals[((vertex[2] - 1) || vertex[0]) * 3 + 0]);
+            unpacked.norms.push(+vertNormals[((vertex[2] - 1) || vertex[0]) * 3 + 1]);
+            unpacked.norms.push(+vertNormals[((vertex[2] - 1) || vertex[0]) * 3 + 2]);
+
+            unpacked.hashindices[elements[j]] = unpacked.index;
+            unpacked.indices.push(unpacked.index);
+            unpacked.index += 1;
+          }
+          if (j === 3 && quad) unpacked.indices.push(unpacked.hashindices[elements[0]]);
+        }
+      }
+    }
+    {
+      const {verts, norms, textures} = unpacked;
+      for (var j = 0; j < verts.length / 3; j++) {
+        this.arrays.position.push(vec3(verts[3 * j], verts[3 * j + 1], verts[3 * j + 2]));
+        this.arrays.normal.push(vec3(norms[3 * j], norms[3 * j + 1], norms[3 * j + 2]));
+        this.arrays.texture_coord.push(vec(textures[2 * j], textures[2 * j + 1]));
+      }
+      this.indices = unpacked.indices;
+    }
+    this.normalize_positions(false);
+    this.ready = true;
+  }
+
+  draw(context, program_state, model_transform, material) {               // draw(): Same as always for shapes, but cancel all
+    // attempts to draw the shape before it loads:
+    if (this.ready)
+      super.draw(context, program_state, model_transform, material);
+  }
+}
+
+
+
 window.Triangle = window.classes.Triangle =
 class Triangle extends Shape    // The simplest possible Shape – one triangle.  It has 3 vertices, each
 { constructor()                 // having their own 3D position, normal vector, and texture-space coordinate.
@@ -15,7 +120,33 @@ class Triangle extends Shape    // The simplest possible Shape – one triangle.
                  // told it how to connect vertex entries into triangles.  Every three indices in "this.indices" traces out one triangle.
     }
 }
+window.Cube_Outline = window.classes.Cube_Outline =
+    class Cube_Outline extends Shape {
+      constructor() {
+        super("positions", "colors"); // Name the values we'll define per each vertex.
+        const white_c = Color.of(1, 0, 0, 1);
+        this.positions.push(...Vec.cast(
+            [-1, -1, -1], [-1, -1, 1],
+            [-1, -1, -1], [-1, 1, -1],
+            [-1, -1, -1], [1, -1, -1],
+            [-1, -1, 1], [-1, 1, 1],
+            [-1, -1, 1], [1, -1, 1],
+            [-1, 1, -1], [-1, 1, 1],
+            [-1, 1, -1], [1, 1, -1],
+            [1, -1, -1], [1, 1, -1],
+            [1, -1, -1], [1, -1, 1], // to here
+            [1, 1, 1], [1, -1, 1],
+            [1, 1, 1], [-1, 1, 1],
+            [1, 1, 1], [1, 1, -1]));
 
+        // When a set of lines is used in graphics, you should think of the list entries as
+        // broken down into pairs; each pair of vertices will be drawn as a line segment.
+        this.colors = [white_c, white_c, white_c, white_c, white_c, white_c, white_c, white_c,
+          white_c, white_c, white_c, white_c, white_c, white_c, white_c, white_c,
+          white_c, white_c, white_c, white_c, white_c, white_c, white_c, white_c,];
+        this.indexed = false;       // Do this so we won't need to define "this.indices".
+      }
+    };
 
 window.Square = window.classes.Square =
 class Square extends Shape              // A square, demonstrating two triangles that share vertices.  On any planar surface, the interior 
@@ -37,7 +168,7 @@ window.Square_2 = window.classes.Square_2 =
       { super( "positions", "normals", "texture_coords" );                                   // Name the values we'll define per each vertex.
         this.positions     .push( ...Vec.cast( [-1,-1,0], [1,-1,0], [-1,1,0], [1,1,0] ) );   // Specify the 4 square corner locations.
         this.normals       .push( ...Vec.cast( [0,0,1],   [0,0,1],  [0,0,1],  [0,0,1] ) );   // Match those up with normal vectors.
-        this.texture_coords.push( ...Vec.cast( [0,0],     [15,0],    [0,15],    [15,15]   ) );   // Draw a square in texture coordinates too.
+        this.texture_coords.push( ...Vec.cast( [0,0],     [10,0],    [0,10],    [10,10]   ) );   // Draw a square in texture coordinates too. was 15
         this.indices       .push( 0, 1, 2,     1, 3, 2 );                   // Two triangles this time, indexing into four distinct vertices.
       }
     }
@@ -265,6 +396,14 @@ window.Cylindrical_Tube = window.classes.Cylindrical_Tube =
 class Cylindrical_Tube extends Surface_Of_Revolution    // An open tube shape with equally sized sections, pointing down Z locally.    
   { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [1, 0, .5], [1, 0, -.5] ), texture_range ); } }
 
+window.Cylindrical_Tube_2 = window.classes.Cylindrical_Tube_2 =
+    class Cylindrical_Tube_2 extends Surface_Of_Revolution    // An open tube shape with equally sized sections, pointing down Z locally.
+    { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [1, 0, .5], [1, .5, -.5] ), texture_range ); } }
+
+window.Cylindrical_Tube_3 = window.classes.Cylindrical_Tube_3 =
+    class Cylindrical_Tube_3 extends Surface_Of_Revolution    // An open tube shape with equally sized sections, pointing down Z locally.
+    { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [.2, 0, .5], [1, 1, -1] ), texture_range ); } }
+
 window.Cone_Tip = window.classes.Cone_Tip =
 class Cone_Tip extends Surface_Of_Revolution        // Note:  Touches the Z axis; squares degenerate into triangles as they sweep around.
   { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [0, 0, 1],  [1, 0, -1]  ), texture_range ); } }
@@ -313,6 +452,26 @@ window.SpikeBall = window.classes.SpikeBall =
     for(var i = 0; i < 2; i++) {
       Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*i) / 2, Vec.of(0, 1, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
     }
+      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
+      //Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*3) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])));
+      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.65,.65,.65]));
+    }
+    }
+window.Balloon = window.classes.Balloon =
+    class Balloon extends Shape
+    { constructor( rows, columns, texture_range )
+    { super( "positions", "normals", "texture_coords" );
+      Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.scale([.025,.025,2]))//.times(Mat4.rotation((Math.PI/2*0), [0,0,1])))
+      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,.85,0]).times(Mat4.scale([.69,.69,.69])).times(Mat4.rotation((Math.PI/2), [1,0,0])))
+      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([0,2,0]).times(Mat4.scale([1.05,1.10,1.05])));
+    }
+    }
+
+window.Words = window.classes.Words =
+    class SpikeBall extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( rows, columns, texture_range )
+    { super( "positions", "normals", "texture_coords" );
+      Square.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*i) / 2, Vec.of(0, 1, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
       Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
       //Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*3) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])));
       Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.65,.65,.65]));
@@ -733,33 +892,33 @@ class Movement_Controls extends Scene_Component    // Movement_Controls is a Sce
   make_control_panel()                                                        // This function of a scene sets up its keyboard shortcuts.
     { const globals = this.globals;
       this.control_panel.innerHTML += "Click and drag the scene to <br> spin your viewpoint around it.<br>";
-      this.key_triggered_button( "Up",     [ " " ], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0 );
-      this.key_triggered_button( "Forward",[ "w" ], () => this.thrust[2] =  1, undefined, () => this.thrust[2] = 0 );  this.new_line();
-      this.key_triggered_button( "Left",   [ "a" ], () => this.thrust[0] =  1, undefined, () => this.thrust[0] = 0 );
-      this.key_triggered_button( "Back",   [ "s" ], () => this.thrust[2] = -1, undefined, () => this.thrust[2] = 0 );
-      this.key_triggered_button( "Right",  [ "d" ], () => this.thrust[0] = -1, undefined, () => this.thrust[0] = 0 );  this.new_line();
-      this.key_triggered_button( "Down",   [ "z" ], () => this.thrust[1] =  1, undefined, () => this.thrust[1] = 0 ); 
+      this.key_triggered_button( "Up",     [ "1" ], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0 );  this.new_line();
+      this.key_triggered_button( "Forward",[ "2" ], () => this.thrust[2] =  1, undefined, () => this.thrust[2] = 0 );  this.new_line();
+     // this.key_triggered_button( "Left",   [ "3" ], () => this.thrust[0] =  1, undefined, () => this.thrust[0] = 0 );  this.new_line();
+      this.key_triggered_button( "Back",   [ "3" ], () => this.thrust[2] = -1, undefined, () => this.thrust[2] = 0 );  this.new_line();
+     // this.key_triggered_button( "Right",  [ "5" ], () => this.thrust[0] = -1, undefined, () => this.thrust[0] = 0 );  this.new_line();
+      this.key_triggered_button( "Down",   [ "4" ], () => this.thrust[1] =  1, undefined, () => this.thrust[1] = 0 );
 
       const speed_controls = this.control_panel.appendChild( document.createElement( "span" ) );
       speed_controls.style.margin = "30px";
-      this.key_triggered_button( "-",  [ "o" ], () => this.speed_multiplier  /=  1.2, "green", undefined, undefined, speed_controls );
-      this.live_string( box => { box.textContent = "Speed: " + this.speed_multiplier.toFixed(2) }, speed_controls );
-      this.key_triggered_button( "+",  [ "p" ], () => this.speed_multiplier  *=  1.2, "green", undefined, undefined, speed_controls );
-      this.new_line();
-      this.key_triggered_button( "Roll left",  [ "," ], () => this.roll =  1, undefined, () => this.roll = 0 );
-      this.key_triggered_button( "Roll right", [ "." ], () => this.roll = -1, undefined, () => this.roll = 0 );  this.new_line();
-      this.key_triggered_button( "(Un)freeze mouse look around", [ "f" ], () => this.look_around_locked ^=  1, "green" );
-      this.new_line();
-      this.live_string( box => box.textContent = "Position: " + this.pos[0].toFixed(2) + ", " + this.pos[1].toFixed(2) 
-                                                       + ", " + this.pos[2].toFixed(2) );
-      this.new_line();        // The facing directions are actually affected by the left hand rule:
-      this.live_string( box => box.textContent = "Facing: " + ( ( this.z_axis[0] > 0 ? "West " : "East ")
-                   + ( this.z_axis[1] > 0 ? "Down " : "Up " ) + ( this.z_axis[2] > 0 ? "North" : "South" ) ) );
-      this.new_line();     
-      this.key_triggered_button( "Go to world origin", [ "r" ], () => this.target().set_identity( 4,4 ), "orange" );  this.new_line();
-      this.key_triggered_button( "Attach to global camera", [ "Shift", "R" ], () => 
-                                          globals.movement_controls_target = () => globals.graphics_state.camera_transform, "blue" );
-      this.new_line();
+     // this.key_triggered_button( "-",  [ "o" ], () => this.speed_multiplier  /=  1.2, "green", undefined, undefined, speed_controls );
+     // this.live_string( box => { box.textContent = "Speed: " + this.speed_multiplier.toFixed(2) }, speed_controls );
+     // this.key_triggered_button( "+",  [ "p" ], () => this.speed_multiplier  *=  1.2, "green", undefined, undefined, speed_controls );
+    //  this.new_line();
+      //this.key_triggered_button( "Roll left",  [ "," ], () => this.roll =  1, undefined, () => this.roll = 0 );
+      //this.key_triggered_button( "Roll right", [ "." ], () => this.roll = -1, undefined, () => this.roll = 0 );  this.new_line();
+     // this.key_triggered_button( "(Un)freeze mouse look around", [ "f" ], () => this.look_around_locked ^=  1, "green" );
+     // this.new_line();
+     // this.live_string( box => box.textContent = "Position: " + this.pos[0].toFixed(2) + ", " + this.pos[1].toFixed(2)
+      //                                                 + ", " + this.pos[2].toFixed(2) );
+     // this.new_line();        // The facing directions are actually affected by the left hand rule:
+     // this.live_string( box => box.textContent = "Facing: " + ( ( this.z_axis[0] > 0 ? "West " : "East ")
+       //            + ( this.z_axis[1] > 0 ? "Down " : "Up " ) + ( this.z_axis[2] > 0 ? "North" : "South" ) ) );
+     // this.new_line();
+      //this.key_triggered_button( "Go to world origin", [ "r" ], () => this.target().set_identity( 4,4 ), "orange" );  this.new_line();
+      //this.key_triggered_button( "Attach to global camera", [ "Shift", "R" ], () =>
+       //                                   globals.movement_controls_target = () => globals.graphics_state.camera_transform, "blue" );
+     // this.new_line();
     }
   first_person_flyaround( radians_per_frame, meters_per_frame, leeway = 70 )
     { const sign = this.will_invert ? 1 : -1;

@@ -561,7 +561,7 @@ window.Scene_Component = window.tiny_graphics.Scene_Component =
 
 window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
     class Canvas_Widget                    // Canvas_Widget embeds a WebGL demo onto a website, along with various panels of controls.
-    { constructor( element, scenes, show_controls = true )   // One panel exists per each scene that's used in the canvas.  You can use up
+    { constructor( element, scenes, show_controls = true)   // One panel exists per each scene that's used in the canvas.  You can use up
     { this.create( element, scenes, show_controls )      // to 16 Canvas_Widgets; browsers support up to 16 WebGL contexts per page.
 
       const rules = [ ".canvas-widget { width: 1080px; background: DimGray }",
@@ -569,22 +569,22 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
         ".canvas-widget canvas { width: 1080px; height: 600px; margin-bottom:-3px }",
         ".canvas-widget div { background: white }",
         ".canvas-widget table { border-collapse: collapse; display:block; overflow-x: auto; }",
-        ".canvas-widget table.control-box { width: 1080px; border:0; margin:0; max-height:380px; transition:.5s; overflow-y:scroll; background:DimGray }",
+        ".canvas-widget table.control-box { width: 1080px; border:0; margin:0; max-height:500px; transition:.5s; overflow-y:scroll; background:lightblue }", //set at 380
         ".canvas-widget table.control-box:hover { max-height:500px }",
-        ".canvas-widget table.control-box td { overflow:hidden; border:0; background:DimGray; border-radius:30px }",
-        ".canvas-widget table.control-box td .control-div { background: #EEEEEE; height:338px; padding: 5px 5px 5px 30px; box-shadow: 25px 0px 60px -15px inset }",
+        ".canvas-widget table.control-box td { overflow:hidden; border:0; background:DimGray; border-radius:10px }",
+        ".canvas-widget table.control-box td .control-div { background: #ADDAE6; height:500px; padding: 5px 5px 5px 30px; box-shadow: 0px 0px 0px 0px inset }", //set at 250
         ".canvas-widget table.control-box td * { background:transparent }",
         ".canvas-widget table.control-box .control-div td { border-radius:unset }",
-        ".canvas-widget table.control-box .control-title { padding:7px 40px; color:white; background:DarkSlateGray; box-shadow: 25px 0px 70px -15px inset black }",
+        ".canvas-widget table.control-box .control-title { font-size: 30px; font-family: Brush Script MT, cursive; padding:7px 40px; color:white; background:#01A7EC; box-shadow: 25px 0px 70px -15px inset black }",
         ".canvas-widget *.live_string { display:inline-block; background:unset }",
         ".dropdown { display:inline-block }",
         ".dropdown-content { display:inline-block; transition:.2s; transform: scaleY(0); overflow:hidden; position: absolute; \
                               z-index: 1; background:#E8F6FF; padding: 16px; margin-left:30px; min-width: 100px; \
-                              box-shadow: 5px 10px 16px 0px rgba(0,0,0,0.2) inset; border-radius:10px }",
+                              box-shadow: 5px 10px 16px 0px rgba(0,0,0,0.2) inset; border-radius:10px;  }",
         ".dropdown-content a { color: black; padding: 4px 4px; display: block }",
         ".dropdown a:hover { background: #f1f1f1 }",
-        ".canvas-widget button { background: #4C9F50; color: white; padding: 6px; border-radius:9px; \
-                                  box-shadow: 4px 6px 16px 0px rgba(0,0,0,0.3); transition: background .3s, transform .3s }",
+        ".canvas-widget button { background: #4C9F50; color: white; padding: 10px 10px; border-radius:80%; \
+                                  box-shadow: 4px 6px 16px 0px rgba(0,0,0,0.3); border: 2px solid #C0C0C0; height: 80px; width: 110px; margin: 10px 30px; font-size: 20px; font-family: Brush Script MT, cursive; transition: background .3s, transform .3s }",
         ".canvas-widget button:hover, button:focus { transform: scale(1.3); color:gold }",
         ".link { text-decoration:underline; cursor: pointer }",
         ".show { transform: scaleY(1); height:200px; overflow:auto }",
@@ -593,10 +593,11 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
       const style = document.head.appendChild( document.createElement( "style" ) );
       for( const r of rules ) document.styleSheets[document.styleSheets.length - 1].insertRule( r, 0 )
     }
-      create( element, scenes, show_controls )
+      create( element, scenes, show_controls, src )
       { this.patch_ios_bug();
         element = document.querySelector( "#" + element );
-        try  { this.populate_canvas( element, scenes, show_controls );
+        try  { this.populate_canvas( element, scenes, show_controls,src );
+
         } catch( error )
         { element.innerHTML = "<H1>Error loading the demo.</H1>" + error }
       }
@@ -607,7 +608,7 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
         Vec.from = function( arr ) { return new Vec( Array.from( arr       ) ) }
       }
       }
-      populate_canvas( element, scenes, show_controls )   // Assign a Webgl_Manager to the WebGL canvas.
+      populate_canvas( element, scenes, show_controls, src )   // Assign a Webgl_Manager to the WebGL canvas.
       { if( !scenes.every( x => window[ x ] ) )         // Make sure each scene class really exists.
         throw "(Featured class not found)";
         const canvas = element.appendChild( document.createElement( "canvas" ) );
@@ -619,6 +620,7 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
 
         for( let scene_class_name of scenes )                  // Register the initially requested scenes to the render loop.
           this.webgl_manager.register_scene_component( new window[ scene_class_name ]( this.webgl_manager, row.insertCell() ) );
+
 
         this.webgl_manager.render();   // Start WebGL initialization.  Note that render() will re-queue itself for more calls.
       }
