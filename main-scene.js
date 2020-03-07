@@ -231,9 +231,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 5, 100), Vec.of(0, 0, 0), Vec.of(0, 1, 0));
             this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
-
-            this.initial_avatar_location = Mat4.identity().times(Mat4.translation([0,0,5]));
-            this.avatar_pos = this.initial_avatar_location;
+            this.initial_camera_location = Mat4.translation([0,0,100]).times(this.initial_camera_location);
+            context.globals.graphics_state.camera_transform = Mat4.inverse(this.initial_camera_location);
 
             const r = context.width / context.height;
             context.globals.graphics_state.projection_transform = Mat4.perspective(Math.PI / 4, r, .1, 1000);
@@ -253,6 +252,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     dart : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     cone : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     wing : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
+                    board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)})
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -261,54 +261,58 @@ window.Dart_Scene= window.classes.Dart_Scene =
                            new Light(Vec.of(0, 0, 20, 1), Color.of(1, 1, 1, 1), 1000),
                            new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)];
 
-            this.move_l_pressed = this.move_r_pressed = this.move_u_pressed =
-            this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
-
-
-            this.max_power = 100;
+            // physics variables
+            this.max_power = 200;
             this.power = 0;
+            this.power_x = 0;
+            this.power_y = 0;
+            this.power_z = 0;
+
+            this.accel_x = 0;
+            this.accel_y = -9.8; // gravity
+            this.accel_z = 5;
+
+            // 0 ~ 90 (up down), -90 ~ 90 (left right)
+            this.up_down_angle = 0;
+            this.left_right_angle = 0;
+
+            // conditional variables
             this.charging = false;
             this.shoot = false;
-            this.charging_start_time = 0;
-            this.curr_time = 0;
-            this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
-
-            this.angle = 0; // max 90
             this.angle_up_start = false;
             this.angle_down_start = false;
+            this.angle_left_start = false;
+            this.angle_right_start = false;
+
+            // time
+            this.charging_start_time = 0;
+            this.curr_time = 0;
+
+            // transform: dart, board, power bar
+            this.default_dart_pos = [-100 ,0, 0]; // default (based on the rightmost piece)
+            this.dart_pos = [-100 ,0, 0]; // current dart position
+            this.board_pos = [100,0,0]; // default
+            this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
+
+            this.front_view = Mat4.identity()
+                .times(Mat4.translation([-120,0,0]))
+                .times(Mat4.rotation(-1*Math.PI/2, Vec.of(0,1,0)));
 
         }
 
         make_control_panel() {
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
+            this.key_triggered_button("Charge", ["Enter"], this.start_charging, '#'+Math.random().toString(9).slice(-6), this.start_shoot);
+            this.new_line();
+            this.key_triggered_button("Angle Up", ["i"], this.angle_up, '#'+Math.random().toString(9).slice(-6), this.angle_up_release);
+            this.key_triggered_button("Angle Down", ["k"], this.angle_down, '#'+Math.random().toString(9).slice(-6), this.angle_down_release);
+            this.key_triggered_button("Angle Left", ["j"], this.angle_left, '#'+Math.random().toString(9).slice(-6), this.angle_left_release);
+            this.key_triggered_button("Angle Right", ["l"], this.angle_right, '#'+Math.random().toString(9).slice(-6), this.angle_right_release);
+            this.new_line();
+            this.key_triggered_button("Restart", ["q"], this.restart, '#'+Math.random().toString(9).slice(-6));
+            this.key_triggered_button("Front View", ["1"], ()=>this.attached=()=> this.front_view, '#'+Math.random().toString(9).slice(-6));
+            this.key_triggered_button("Side View", ["2"],  ()=>this.attached=()=> this.initial_camera_location, '#'+Math.random().toString(9).slice(-6));
 
-            this.key_triggered_button("Charge", ["Enter"], this.start_charging, '#'+Math.random().toString(9).slice(-6),this.shoot);
-            this.new_line();
-
-            this.key_triggered_button("Angle Up", ["k"], this.angle_up, '#'+Math.random().toString(9).slice(-6), this.angle_up_release);
-            this.key_triggered_button("Angle Down", ["l"], this.angle_down, '#'+Math.random().toString(9).slice(-6), this.angle_down_release);
-
-            this.new_line();
-
-            this.key_triggered_button("Move Avatar Left", ["4"], () => {this.move_l_pressed = true});
-            this.key_triggered_button("Move Avatar Right", ["5"], () => {this.move_r_pressed = true});
-            this.new_line();
-            this.key_triggered_button("Move Avatar Up", ["6"], () => {this.move_u_pressed = true});
-            this.key_triggered_button("Move Avatar Down", ["7"], () => {this.move_d_pressed = true});
-            this.new_line();
-            this.key_triggered_button("Move Avatar Forward", ["8"], () => {this.move_f_pressed = true});
-            this.key_triggered_button("Move Avatar Back", ["9"], () => {this.move_b_pressed = true});
-            this.new_line();
-            this.new_line();
-            this.new_line();
-            this.key_triggered_button("View whole scene", ["0"], () => this.attached = () => this.initial_camera_location);
-            this.new_line();
-            this.key_triggered_button("Attach to mirror 1", ["1"], () => this.attached = () => this.mirror_1);
-            this.key_triggered_button("Attach to mirror 2", ["2"], () => this.attached = () => this.mirror_2);
-            this.new_line();
-            this.key_triggered_button("Attach to mirror 3", ["3"], () => this.attached = () => this.mirror_3);
-            this.key_triggered_button("Attach to avatar 4", ["a"], () => this.attached = () => this.avatar_pos);
-            this.new_line();
         }
 
         start_charging() {
@@ -318,39 +322,272 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.charging_start_time = this.curr_time;
         }
 
-        shoot() {
+        /* Key Event Handlers */
+        start_shoot() {
             console.log("Shoot!");
             console.log(this.power);
             this.charging = false;
             this.shoot = true;
+            this.decompose_power_x_y_z(this.power, this.up_down_angle, this.left_right_angle);
         }
+
         angle_up() {
             if (!this.angle_down_start) {
                 this.angle_up_start = true;
             }
         }
+
         angle_up_release() {
             this.angle_up_start = false;
         }
+
         angle_down() {
             if (!this.angle_up_start) {
                 this.angle_down_start = true;
             }
         }
+
         angle_down_release() {
             this.angle_down_start = false;
         }
-        set_angle() {
-            if (this.angle_up_start && this.angle < 100) {
-                this.angle = this.angle + 1;
-            } else if (this.angle_down_start && this.angle > 0) {
-                this.angle = this.angle - 1;
+
+        angle_left() {
+            if (!this.angle_right_start) {
+                this.angle_left_start = true;
             }
         }
+
+        angle_left_release() {
+            this.angle_left_start = false;
+        }
+
+        angle_right() {
+            if (!this.angle_left_start) {
+                this.angle_right_start = true;
+            }
+        }
+
+        angle_right_release() {
+            this.angle_right_start = false;
+        }
+
+        set_angle() {
+            let one_move = Math.PI / 180;
+            if (this.angle_up_start && this.up_down_angle < Math.PI/2) {
+                this.up_down_angle += one_move;
+            } else if (this.angle_down_start && this.up_down_angle > 0) {
+                this.up_down_angle -= one_move;
+            }
+
+            if (this.angle_left_start && this.left_right_angle < Math.PI/2) {
+                this.left_right_angle += one_move;
+            } else if (this.angle_right_start && this.left_right_angle > -1* Math.PI/2) {
+                this.left_right_angle -= one_move;
+            }
+        }
+
         set_bar_transform() {
             this.bar_transform = Mat4.identity()
                 .times(Mat4.scale([1,10*(this.power/this.max_power),1]))
                 .times(Mat4.translation([10,0,0]))
+        }
+
+        restart() {
+            this.power = 0;
+            this.left_right_angle = 0;
+            this.up_down_angle = 0;
+
+            // conditional variables
+            this.charging = false;
+            this.shoot = false;
+            this.angle_up_start = false;
+            this.angle_down_start = false;
+            this.angle_left_start = false;
+            this.angle_right_start = false;
+
+            // transform: dart, board, power bar
+            this.dart_pos = [-100,0,0]; // current dart position
+            this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
+        }
+
+        draw_dart(graphics_state) {
+            let transform = Mat4.identity();
+
+            // dart piece 1
+            let x_offset = -19;
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([10,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-10,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+
+            // dart piece 2
+            x_offset = -17;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([8,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-8,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([0.5,0.5,4]));
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+
+            // dart piece 3
+            x_offset = -16;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([7,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-7,0,0]));
+            transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
+            // dart piece 4
+            x_offset = -12;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([3,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-3,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([1,1,6]));
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+
+            // dart piece 5
+            x_offset = -10;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([1,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-1,0,0]));
+            transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([1.3,1.3,2]));
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
+
+            // dart piece 6
+            x_offset = -5;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([-4,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([4,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([1.3,1.3,6]));
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+
+            // dart piece 7
+            x_offset = -9;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([10,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([1,1,10]));
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
+            // dart piece 8 (rightmost)
+            x_offset = 0;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([-9,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([9,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([1.3,1.3,2]));
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
+
+            transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([X,Y,0]));
+            // transform = transform.times(Mat4.translation([-20,0,0]));
+            // transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4([2,2,3]);
+            // transform = transform.times(Mat4.scale([2,2,3]));
+            // this.shapes.wing.draw(graphics_state, transform, this.materials.wing);
+        }
+
+        // based on z and y values
+        compute_distance(p1, p2) {
+            return Math.sqrt((p1[2] - p2[2]) ** 2 + (p1[1] - p2[1]) ** 2);
+        }
+
+        // Determine only based on x-axis
+        // position can be vec3
+        detect_collision(dart_pos, board_pos, board_rad) {
+            let x_offset = Math.abs(dart_pos[0]-board_pos[0]);
+            if (x_offset <= 1 && this.compute_distance(dart_pos, board_pos) <= board_rad) {
+                // collision
+                return true;
+            }
+            return false;
+        }
+
+        compute_score(dart_pos, board_pos, board_rad) {
+
+            let z_offset = dart_pos[2] - board_pos[2];
+            let y_offset = dart_pos[1] - board_pos[1];
+
+            if (z_offset === 0 && y_offset === 0) {
+                console.log("Bulls EYE");
+            }
+
+            if (z_offset < 0)
+                if (y_offset < 0) {
+                    console.log("Score 10");
+                } else {
+                    console.log("Score 20");
+                }
+             else {
+                if (y_offset < 0) {
+                    console.log("Score 30");
+                } else {
+                    console.log("Score 40");
+                }
+            }
+        }
+
+        decompose_power_x_y_z(power, up_down_angle, left_right_angle) {
+            let p_xy = power * Math.cos(left_right_angle);
+            let p_xz = power * Math.cos(up_down_angle);
+            this.power_x = p_xy * Math.cos(up_down_angle);
+            this.power_y = p_xy * Math.sin(up_down_angle);
+            this.power_z = -1 * p_xz * Math.sin(left_right_angle);
+        }
+
+        apply_accel(dt) {
+            this.power_x += this.accel_x * dt;
+            this.power_y += this.accel_y * dt;
+            this.power_z += this.accel_z * dt;
+        }
+
+        update_dart_pos(dt) {
+            this.dart_pos[0] += this.power_x * dt;
+            this.dart_pos[1] += this.power_y * dt;
+            this.dart_pos[2] += this.power_z * dt;
+        }
+
+        update_dart_angle() {
+            this.up_down_angle = Math.atan(this.power_y / this.power_x);
+            this.left_right_angle = -1 * Math.atan(this.power_z / this.power_x);
+        }
+
+        draw_board(graphics_state){
+            let transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([100,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,50,0]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.board);
         }
 
         display(graphics_state) {
@@ -363,142 +600,39 @@ window.Dart_Scene= window.classes.Dart_Scene =
             } else {
                 this.curr_time = t;
             }
-
-            this.set_angle();
+            // set up the power charging bar
             this.set_bar_transform();
-
             this.shapes.bar.draw(graphics_state, this.bar_transform, this.materials.bar);
 
-
-            let transform = Mat4.identity();
-
-            let angle = Math.PI / 200 * this.angle;
-            let V = this.power;
-            const g = 9.8;
-
-            let Vx = V * Math.cos(angle);
-            let Vy = V * Math.sin(angle);
-
-            let X = 0;
-            let Y = 0;
-
-            let cur_angle = angle;
-
             if(this.shoot){
-                Vx = V * Math.cos(angle);
-                Vy = V * Math.sin(angle);
-
-                X = Vx * t;
-                Y = Vy * t - g * t*t/2;
-
-                cur_angle = Math.atan(Y/X);
+                this.apply_accel(dt);
+                this.update_dart_pos(dt);
+                this.update_dart_angle();
+            } else {
+                // when key pressed, adjust angle
+                this.set_angle();
             }
 
+            // draw the dart that consists of 9 pieces
+            this.draw_dart(graphics_state);
 
-            
+            // draw the board
+            this.draw_board(graphics_state);
 
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-20,0,0]));
-            transform = transform.times(Mat4.translation([10,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([-10,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            //console.log(this.dart_pos);
+            if (this.detect_collision(this.dart_pos, this.board_pos, 50)) {
+                console.log("Detected Collision");
+                this.shoot = false;
+                let score = this.compute_score(this.dart_pos, this.board_pos, 50);
+                console.log("Score: ", score);
+                this.restart();
+            }
 
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-18,0,0]));
-            transform = transform.times(Mat4.translation([8,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([-8,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-            transform = transform.times(Mat4.scale([0.5,0.5,4]));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
-
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-17,0,0]));
-            transform = transform.times(Mat4.translation([7,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([-7,0,0]));
-            transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
-
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-13,0,0]));
-            transform = transform.times(Mat4.translation([3,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([-3,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-            transform = transform.times(Mat4.scale([1,1,6]));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
-
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-11,0,0]));
-            transform = transform.times(Mat4.translation([1,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([-1,0,0]));
-            transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([1.3,1.3,2]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
-
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-6,0,0]));
-            transform = transform.times(Mat4.translation([-4,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([4,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-            transform = transform.times(Mat4.scale([1.3,1.3,6]));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
-
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-1,0,0]));
-            transform = transform.times(Mat4.translation([-9,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([9,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([1.3,1.3,2]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([X,Y,0]));
-            transform = transform.times(Mat4.translation([-10,0,0]));
-            transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([10,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([1,1,10]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
-
-
-            transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([X,Y,0]));
-            // transform = transform.times(Mat4.translation([-20,0,0]));
-            // transform = transform.times(Mat4.rotation(cur_angle, Vec.of(0,0,1)));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4([2,2,3]);
-            // transform = transform.times(Mat4.scale([2,2,3]));
-            this.shapes.wing.draw(graphics_state, transform, this.materials.wing);
-
-            //target
-
-            transform = Mat4.identity();
-
-            transform = transform.times(Mat4.translation([20,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-
-            // transform = transform.times(Mat4.scale([10,10,1]));
-
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+            // set camera if necessary
+            if (this.attached !== undefined) {
+                graphics_state.camera_transform = Mat4.translation([0,0,-5]).times(Mat4.inverse(this.attached()))
+                    .map( (x, i) => Vec.from( graphics_state.camera_transform[i] ).mix( x, 0.1 ));
+            }
 
         }
     };
