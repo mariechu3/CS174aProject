@@ -82,6 +82,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         texture: context.get_instance("assets/ground.jpg", true)
       })
     };
+    console.log(this.shapes.avatar);
 
     this.lights = [
       new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -313,7 +314,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     //draw avatar
     if(this.avatar_pos[1][3]>0)
       this.avatar_pos[1][3] -= dt;
-    console.log (this.avatar_pos)
+    //console.log (this.avatar_pos)
     this.shapes.spike.draw(
         graphics_state,
         this.avatar_pos,

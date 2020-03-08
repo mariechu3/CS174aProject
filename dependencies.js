@@ -1,5 +1,8 @@
+import { tiny } from './tiny-graphics';
+const { vec, vec3, tinyShape } = tiny;
+
 window.Shape_From_File = window.classes.Shape_From_File =
-class Shape_From_File extends Shape {
+class Shape_From_File extends tinyShape {
   // **Shape_From_File** is a versatile standalone Shape that imports
   // all its arrays' data from an .obj 3D model file.
   constructor(filename) {
