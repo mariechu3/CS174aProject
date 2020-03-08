@@ -62,6 +62,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
 
     this.lights = [
       new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
+      new Light(Vec.of(25, 0, 0, 1), Color.of(1, 1, 1, 1), 100000),
       new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
       new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
       new Light(Vec.of(0, 0, 20, 1), Color.of(1, 1, 1, 1), 1000),
@@ -383,7 +384,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 bar: new Cube(),
                 cylinder: new Rounded_Capped_Cylinder(15,15,[2,2]),
                 cone : new Closed_Cone(15, 15, [2,2]),
-                wing: new Cube(),
+                wing: new Windmill(4),
+                wood: new Cube(),
             };
             this.submit_shapes(context, shapes);
 
@@ -394,7 +396,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     dart : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     cone : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     wing : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
-                    board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)})
+                    board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
+                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/black_fabric.png", true)}),
+                    wood : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5, diffusivity: 1,}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -552,11 +556,84 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
         }
 
+        draw_background(graphics_state) {
+            // transform = transform.times(Mat4.translation([-400,0,-500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([-200,0,-500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([0,0,-500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([200,0,-500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([400,0,-500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([450,0,-500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([450,0,-300]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([450,0,-100]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([450,0,100]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([450,0,300]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            //
+            // transform = Mat4.identity();
+            // transform = transform.times(Mat4.translation([450,0,500]));
+            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            // transform = transform.times(Mat4.scale([50,50,0]));
+            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+        }
+
         draw_dart(graphics_state) {
-            let transform = Mat4.identity();
 
             // dart piece 1
             let x_offset = -19;
+            let transform = Mat4.identity()
             transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
             transform = transform.times(Mat4.translation([10,0,0]));
             transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
@@ -626,17 +703,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
 
             // dart piece 7
-            x_offset = -9;
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
-            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
-            transform = transform.times(Mat4.translation([10,0,0]));
-            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([1,1,10]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
-
-            // dart piece 8 (rightmost)
             x_offset = 0;
             transform = Mat4.identity();
             transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
@@ -647,6 +713,18 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1.3,1.3,2]));
             this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
+            // dart piece 8 (rightmost)
+            x_offset = -9;
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([10,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([1,1,10]));
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+
 
 
             transform = Mat4.identity();
@@ -754,6 +832,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 // when key pressed, adjust angle
                 this.set_angle();
             }
+
+            //draw five gray fabrics
+            this.draw_background(graphics_state);
 
             // draw the dart that consists of 9 pieces
             this.draw_dart(graphics_state);
