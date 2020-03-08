@@ -384,7 +384,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 bar: new Cube(),
                 cylinder: new Rounded_Capped_Cylinder(15,15,[2,2]),
                 cone : new Closed_Cone(15, 15, [2,2]),
-                flag: new Flag2(201)
+                flag: new Flag2(201),
                 wing: new Windmill(4),
                 wood: new Cube(),
             };
@@ -905,7 +905,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
         }
     };
 
-
 class Flag_Shader extends Phong_Shader
 {
 
@@ -962,9 +961,6 @@ class Flag_Shader extends Phong_Shader
         gl.uniform4fv( gpu.lightColor_loc,          lightColors_flattened );
         gl.uniform1fv( gpu.attenuation_factor_loc,  lightAttenuations_flattened );
     }
-
-
-
 
     shared_glsl_code()            // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
     { return `precision mediump float;
