@@ -390,8 +390,11 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 background_wall: new Cube(),
                 beer: new Cylindrical_Tube(15, 15, [20,20]),
                 triangle: new Triangle(),
+                ground: new Cube()
             };
-            shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 100, v[1] * 100));
+            //shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 20));
+            shapes.ground.texture_coords = shapes.ground.texture_coords.map(v => Vec.of(v[0] * 40, v[1] * 20));
+
             this.submit_shapes(context, shapes);
 
             // Make some Material objects available to you:
@@ -404,10 +407,11 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
                     beer : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/heineken.png", true)}),
                     flag: context.get_instance(Flag_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/flag.png", true)}),
-                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/black_fabric.png", true)}),
-                    wood : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5, diffusivity: 1,}),
                     blue_fire : context.get_instance(Phong_Shader).material(Color.of(44/255,83/255,143/255,1), {ambient: 1, diffusivity: 1,}),
                     yellow_fire : context.get_instance(Phong_Shader).material(Color.of(1,189/255,46/255,1), {ambient: 1, diffusivity: 1,})
+                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/classic.jpg", true)}),
+                    wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/high_res_wood_tile.jpg", true)}),
+                    table_wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/table_wood.jpg", true)}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -571,18 +575,56 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
         }
 
+
+        draw_table(graphics_state, x,y,z) {
+            // body
+            let transform = Mat4.identity()
+                .times(Mat4.translation([0, -90, -450]))
+                .times(Mat4.scale([200, 10, 100]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+
+            // 4 legs (length: 100)
+            // front 2 legs
+            transform = Mat4.identity()
+                .times(Mat4.translation([-150, -200, -400]))
+                .times(Mat4.scale([10, 100, 10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+
+            transform = Mat4.identity()
+                .times(Mat4.translation([150, -200, -400]))
+                .times(Mat4.scale([10, 100, 10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+
+            // back 2 legs
+            transform = Mat4.identity()
+                .times(Mat4.translation([-150, -200, -500]))
+                .times(Mat4.scale([10, 100, 10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+
+            transform = Mat4.identity()
+                .times(Mat4.translation([150, -200, -500]))
+                .times(Mat4.scale([10, 100, 10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+
+
+        }
+
+        draw_ground(graphics_state) {
+            // ground
+            let transform = Mat4.identity()
+                .times(Mat4.translation([0,-200,0] ))
+                .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
+                .times(Mat4.scale([1000,1000,1]));
+
+            this.shapes.ground.draw(graphics_state, transform, this.materials.wood);
+        }
+
         draw_background(graphics_state) {
             let transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([0,0,-500]));
+            transform = transform.times(Mat4.translation([0,100,-750]));
             // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([500,500,0]));
+            transform = transform.times(Mat4.scale([1000,1000,0]));
             this.shapes.background_wall.draw(graphics_state, transform, this.materials.fabric);
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([0,-100,-450]));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([100,10,50]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.wood);
 
             transform = Mat4.identity();
             transform = transform.times(Mat4.translation([0,0,0]));
@@ -590,6 +632,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.scale([10,10,10]));
             // this.shapes.beer.draw(graphics_state, transform, this.materials.beer);
 
+            this.draw_table(graphics_state, 1,2,3);
+            this.draw_ground(graphics_state);
         }
 
         draw_dart(graphics_state, t) {
