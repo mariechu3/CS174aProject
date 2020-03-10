@@ -389,6 +389,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 wood: new Cube(),
                 background_wall: new Cube(),
                 beer: new Cylindrical_Tube(15, 15, [20,20]),
+                triangle: new Triangle(),
             };
             shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 100, v[1] * 100));
             this.submit_shapes(context, shapes);
@@ -397,14 +398,16 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.materials =
                 {
                     bar : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1}),
-                    dart : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
+                    dart : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 0.5, specularity: 1}),
                     cone : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     wing : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
                     beer : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/heineken.png", true)}),
                     flag: context.get_instance(Flag_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/flag.png", true)}),
                     fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/black_fabric.png", true)}),
-                    wood : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5, diffusivity: 1,})
+                    wood : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5, diffusivity: 1,}),
+                    blue_fire : context.get_instance(Phong_Shader).material(Color.of(44/255,83/255,143/255,1), {ambient: 1, diffusivity: 1,}),
+                    yellow_fire : context.get_instance(Phong_Shader).material(Color.of(1,189/255,46/255,1), {ambient: 1, diffusivity: 1,})
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -585,22 +588,111 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([0,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
             transform = transform.times(Mat4.scale([10,10,10]));
-            this.shapes.beer.draw(graphics_state, transform, this.materials.beer);
+            // this.shapes.beer.draw(graphics_state, transform, this.materials.beer);
 
         }
 
-        draw_dart(graphics_state) {
+        draw_dart(graphics_state, t) {
+            let x_offset = -19;
+            let transform = Mat4.identity();
+
+            if(this.shoot) {
+
+
+                for (let i = 0; i < 4; i++) {
+                    let ang = 1;
+
+                    if (i == 0) ang = 1;
+                    else if (i == 1) ang = 1 / 2;
+                    else if (i == 2) ang = 1 / 4;
+                    else if (i == 3) ang = -1 / 4;
+
+                    transform = Mat4.identity();
+                    transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+                    transform = transform.times(Mat4.translation([10, 0, 0]));
+                    transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0, 1, 0)));
+                    transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.translation([-10, 0, 0]));
+
+
+                    transform = transform.times(Mat4.rotation((Math.PI) * t * t * t, Vec.of(1, 0, 0)));
+                    transform = transform.times(Mat4.rotation((Math.PI) * ang, Vec.of(1, 0, 0)));
+
+                    transform = transform.times(Mat4.rotation(Math.PI / 2, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.scale([1, 20, 1]));
+                    this.shapes.triangle.draw(graphics_state, transform, this.materials.blue_fire);
+
+                    transform = Mat4.identity();
+                    transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+                    transform = transform.times(Mat4.translation([10, 0, 0]));
+                    transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0, 1, 0)));
+                    transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.translation([-10, 0, 0]));
+
+                    transform = transform.times(Mat4.rotation((Math.PI) * t * t * t, Vec.of(1, 0, 0)));
+                    transform = transform.times(Mat4.rotation((Math.PI) * ang, Vec.of(1, 0, 0)));
+
+                    transform = transform.times(Mat4.rotation(Math.PI, Vec.of(1, 0, 0)));
+                    transform = transform.times(Mat4.rotation(Math.PI / 2, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.scale([1, 20, 1]));
+                    this.shapes.triangle.draw(graphics_state, transform, this.materials.blue_fire);
+
+                }
+
+                for (let j = 0; j < 8; j++) {
+                    let ang = 1;
+
+                    if (j == 0) ang = 1 / 8;
+                    else if (j == 1) ang = -1 / 8;
+                    else if (j == 2) ang = 3 / 8;
+                    else if (j == 3) ang = -3 / 8;
+                    else if (j == 4) ang = 1 / 16;
+                    else if (j == 5) ang = -1 / 16;
+                    else if (j == 6) ang = 3 / 16;
+                    else if (j == 7) ang = -3 / 16;
+
+                    transform = Mat4.identity();
+                    transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+                    transform = transform.times(Mat4.translation([10, 0, 0]));
+                    transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0, 1, 0)));
+                    transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.translation([-10, 0, 0]));
+
+                    transform = transform.times(Mat4.rotation((Math.PI) * t * t * t, Vec.of(1, 0, 0)));
+                    transform = transform.times(Mat4.rotation((Math.PI) * ang, Vec.of(1, 0, 0)));
+
+                    transform = transform.times(Mat4.rotation(Math.PI / 2, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.scale([1, 10, 1]));
+                    this.shapes.triangle.draw(graphics_state, transform, this.materials.yellow_fire);
+
+                    transform = Mat4.identity();
+                    transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+                    transform = transform.times(Mat4.translation([10, 0, 0]));
+                    transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0, 1, 0)));
+                    transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.translation([-10, 0, 0]));
+
+                    transform = transform.times(Mat4.rotation((Math.PI) * t * t * t, Vec.of(1, 0, 0)));
+                    transform = transform.times(Mat4.rotation((Math.PI) * ang, Vec.of(1, 0, 0)));
+
+                    transform = transform.times(Mat4.rotation(Math.PI, Vec.of(1, 0, 0)));
+                    transform = transform.times(Mat4.rotation(Math.PI / 2, Vec.of(0, 0, 1)));
+                    transform = transform.times(Mat4.scale([1, 10, 1]));
+                    this.shapes.triangle.draw(graphics_state, transform, this.materials.yellow_fire);
+
+                }
+            }
 
             // dart piece 1
-            let x_offset = -19;
-            let transform = Mat4.identity()
+            x_offset = -19;
+            transform = Mat4.identity();
             transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
             transform = transform.times(Mat4.translation([10,0,0]));
             transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
             transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
             transform = transform.times(Mat4.translation([-10,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart.override( {color: Color.of(251/255, 202/255, 3/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
             // dart piece 2
             x_offset = -17;
@@ -612,7 +704,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([-8,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([0.5,0.5,4]));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart.override( {color: Color.of(103/255, 199/255, 235/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
             // dart piece 3
             x_offset = -16;
@@ -623,7 +715,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
             transform = transform.times(Mat4.translation([-7,0,0]));
             transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone.override( {color: Color.of(251/255, 202/255, 3/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
             // dart piece 4
             x_offset = -12;
@@ -635,7 +727,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([-3,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1,1,6]));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart.override( {color: Color.of(170/255, 5/255, 5/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
             // dart piece 5
             x_offset = -10;
@@ -647,7 +739,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([-1,0,0]));
             transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1.3,1.3,2]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone.override( {color: Color.of(103/255, 199/255, 235/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
 
             // dart piece 6
@@ -660,7 +752,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([4,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1.3,1.3,6]));
-            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart);
+            this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart.override( {color: Color.of(170/255, 5/255, 5/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
             // dart piece 7
             x_offset = 0;
@@ -672,7 +764,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([9,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1.3,1.3,2]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone.override( {color: Color.of(106/255, 12/255, 11/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
             // dart piece 8 (rightmost)
             x_offset = -9;
@@ -683,7 +775,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.translation([10,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([1,1,10]));
-            this.shapes.cone.draw(graphics_state, transform, this.materials.cone);
+            this.shapes.cone.draw(graphics_state, transform, this.materials.cone.override( {color: Color.of(251/255, 202/255, 3/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
 
 
@@ -831,7 +923,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.draw_background(graphics_state);
 
             // draw the dart that consists of 9 pieces
-            this.draw_dart(graphics_state);
+            this.draw_dart(graphics_state, t);
             // draw the board
             this.draw_board(graphics_state);
 
