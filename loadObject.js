@@ -1,6 +1,6 @@
 import { tiny} from './tiny.js';
 export const Shape_From_File = window.Shape_From_File = window.classes.Shape_From_File =
-    class Shape_From_File extends tiny.Shape {
+    class Shape_From_File extends Shape {
         // **Shape_From_File** is a versatile standalone Shape that imports
         // all its arrays' data from an .obj 3D model file.
         constructor(filename) {
@@ -85,12 +85,15 @@ export const Shape_From_File = window.Shape_From_File = window.classes.Shape_Fro
             {
                 const {verts, norms, textures} = unpacked;
                 for (var j = 0; j < verts.length / 3; j++) {
-                    this.arrays.position.push(vec3(verts[3 * j], verts[3 * j + 1], verts[3 * j + 2]));
-                    this.arrays.normal.push(vec3(norms[3 * j], norms[3 * j + 1], norms[3 * j + 2]));
-                    this.arrays.texture_coord.push(vec(textures[2 * j], textures[2 * j + 1]));
+                    this.arrays.position.push(tiny.vec3(verts[3 * j], verts[3 * j + 1], verts[3 * j + 2]));
+                    this.arrays.normal.push(tiny.vec3(norms[3 * j], norms[3 * j + 1], norms[3 * j + 2]));
+                    this.arrays.texture_coord.push(tiny.vec(textures[2 * j], textures[2 * j + 1]));
                 }
                 this.indices = unpacked.indices;
             }
+            this.positions = this.arrays.position;
+            this.normal = this.arrays.normal;
+            this.texture_coord = this.arrays.texture_coord;
             this.normalize_positions(false);
             this.ready = true;
         }
@@ -98,6 +101,6 @@ export const Shape_From_File = window.Shape_From_File = window.classes.Shape_Fro
         draw(context, program_state, model_transform, material) {               // draw(): Same as always for shapes, but cancel all
             // attempts to draw the shape before it loads:
             if (this.ready)
-                super.draw(context, program_state, model_transform, material);
+                super.draw(program_state, model_transform, material);
         }
     }

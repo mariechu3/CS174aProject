@@ -219,19 +219,69 @@ window.Keyboard_Manager = window.tiny_graphics.Keyboard_Manager =
     }
 
 
+class Graphics_Card_Object
+{                                       // ** Graphics_Card_Object** Extending this base class allows an object to
+                                        // copy itself onto a WebGL context on demand, whenever it is first used for
+                                        // a GPU draw command on a context it hasn't seen before.
+  constructor()
+  { this.gpu_instances = new Map() }     // Track which GPU contexts this object has copied itself onto.
+  copy_onto_graphics_card( context, intial_gpu_representation )
+  {                           // copy_onto_graphics_card():  Our object might need to register to multiple
+    // GPU contexts in the case of multiple drawing areas.  If this is a new GPU
+    // context for this object, copy the object to the GPU.  Otherwise, this
+    // object already has been copied over, so get a pointer to the existing
+    // instance.  The instance consists of whatever GPU pointers are associated
+    // with this object, as returned by the WebGL calls that copied it to the
+    // GPU.  GPU-bound objects should override this function, which builds an
+    // initial instance, so as to populate it with finished pointers.
+    const existing_instance = this.gpu_instances.get( context );
+
+    // Warn the user if they are avoidably making too many GPU objects.  Beginner
+    // WebGL programs typically only need to call copy_onto_graphics_card once
+    // per object; doing it more is expensive, so warn them with an "idiot
+    // alarm". Don't trigger the idiot alarm if the user is correctly re-using
+    // an existing GPU context and merely overwriting parts of itself.
+    if( !existing_instance )
+    { Graphics_Card_Object.idiot_alarm |= 0;     // Start a program-wide counter.
+      if( Graphics_Card_Object.idiot_alarm++ > 200 )
+        throw `Error: You are sending a lot of object definitions to the GPU, probably by mistake!  Many of them are likely duplicates, which you
+                   don't want since sending each one is very slow.  To avoid this, from your display() function avoid ever declaring a Shape Shader
+                   or Texture (or subclass of these) with "new", thus causing the definition to be re-created and re-transmitted every frame.  
+                   Instead, call these in your scene's constructor and keep the result as a class member, or otherwise make sure it only happens 
+                   once.  In the off chance that you have a somehow deformable shape that MUST change every frame, then at least use the special
+                   arguments of copy_onto_graphics_card to limit which buffers get overwritten every frame to only the necessary ones.`;
+    }
+    // Check if this object already exists on that GPU context.
+    return existing_instance ||             // If necessary, start a new object associated with the context.
+        this.gpu_instances.set( context, intial_gpu_representation ).get( context );
+  }
+  activate( context, ...args )
+  {                            // activate():  To use, super call it to retrieve a container of GPU
+    // pointers associated with this object.  If none existed one will be created.
+    // Then do any WebGL calls you need that require GPU pointers.
+    return this.gpu_instances.get( context ) || this.copy_onto_graphics_card( context, ...args )
+  }
+}
+
 window.Vertex_Buffer = window.tiny_graphics.Vertex_Buffer =
-    class Vertex_Buffer           // To use Vertex_Buffer, make a subclass of it that overrides the constructor and fills in the right fields.
+    class Vertex_Buffer extends Graphics_Card_Object          // To use Vertex_Buffer, make a subclass of it that overrides the constructor and fills in the right fields.
     {                             // Vertex_Buffer organizes data related to one 3D shape and copies it into GPU memory.  That data is broken
                                   // down per vertex in the shape.  You can make several fields that you can look up in a vertex; for each
                                   // field, a whole array will be made here of that data type and it will be indexed per vertex.  Along with
                                   // those lists is an additional array "indices" describing triangles, expressed as triples of vertex indices,
                                   // connecting the vertices to one another.
+
       constructor( ...array_names )                          // This superclass constructor expects a list of names of arrays that you plan for
-      { this.array_names = array_names;                    // your subclass to fill in and associate with the vertices.
-        for( let n of array_names ) this[n] = [];          // Initialize a blank array member of the Shape with each of the names provided.
-        this.indices = [];
+      {
+        super()
+        this.arrays = {};
+        this.indices = []
+        this.array_names = array_names;// your subclass to fill in and associate with the vertices.
+        for( let n of array_names ) this[n] = [];
+        for( let n of array_names ) this.arrays[n] = []; // Initialize a blank array member of the Shape with each of the names provided.
         this.indexed = true;                  // By default all shapes assume indexed drawing using drawElements().
         this.array_names_mapping_to_WebGLBuffers = {};     // Get ready to associate a GPU buffer with each array.
+
       }
       copy_onto_graphics_card( gl, selection_of_arrays = this.array_names, write_to_indices = true )
       {                                        // Send the completed vertex and index lists to their own buffers in the graphics card.
@@ -351,12 +401,52 @@ window.Shape = window.tiny_graphics.Shape =
       }
     }
 
+class Container
+{                   // **Container** allows a way to create patch JavaScript objects within a single line.  Some properties get
+                    // replaced with substitutes that you provide, without having to write out a new object from scratch.
+                    // To override, simply pass in "replacement", a JS Object of keys/values you want to override, to generate
+                    // a new object.  For shorthand you can leave off the key and only provide a value (pass in directly as
+                    // "replacement") and a guess will be used for which member you want overridden based on type.
+  override( replacement )                     // override(): Generate a copy by value, replacing certain properties.
+  { return this.helper( replacement, Object.create( this.constructor.prototype ) ) }
+  replace(  replacement )                     // replace(): Like override, but modifies the original object.
+  { return this.helper( replacement, this ) }
+  helper( replacement, target )               // (Internal helper function)
+  { Object.assign( target, this );
+    if( replacement.constructor === Object )             // If a JS object was given, use its entries to override:
+      return Object.assign( target, replacement );
+    // Otherwise we'll try to guess the key to override by type:
+    const matching_keys_by_type = Object.entries( this ).filter( ([key, value]) => replacement instanceof value.constructor );
+    if( !matching_keys_by_type[0] ) throw "Container: Can't figure out which value you're trying to replace; nothing matched by type.";
+    return Object.assign( target, { [ matching_keys_by_type[0][0] ]: replacement } );
+  }
+}
 
-window.Graphics_State = window.tiny_graphics.Graphics_State =
-    class Graphics_State                                            // Stores things that affect multiple shapes, such as lights and the camera.
-    { constructor( camera_transform = Mat4.identity(), projection_transform = Mat4.identity() )
-    { Object.assign( this, { camera_transform, projection_transform, animation_time: 0, animation_delta_time: 0, lights: [] } ); }
-    }
+window.Graphics_State = window.tiny_graphics.Graphics_State = class Graphics_State  extends  Container{ // Stores things that affect multiple shapes, such as lights and the camera.
+  constructor(
+    camera_transform = Mat4.identity(),
+    projection_transform = Mat4.identity()
+  ) {
+    super();
+    this.set_camera( camera_transform );
+    Object.assign(this, {
+      projection_transform,
+      animate: true,
+      animation_time: 0,
+      animation_delta_time: 0,
+      lights: []
+    });
+  }
+
+  set_camera( matrix )
+  {                       // set_camera():  Applies a new (inverted) camera matrix to the Program_State.
+    // It's often useful to cache both the camera matrix and its inverse.  Both are needed
+    // often and matrix inversion is too slow to recompute needlessly.
+    // Note that setting a camera matrix traditionally means storing the inverted version,
+    // so that's the one this function expects to receive; it automatically sets the other.
+    Object.assign( this, { camera_transform: Mat4.inverse( matrix ), camera_inverse: matrix } )
+  }
+};
 
 window.Light = window.tiny_graphics.Light =
     class Light                                                     // The properties of one light in the scene (Two 4x1 Vecs and a scalar)
@@ -460,6 +550,7 @@ window.Webgl_Manager = window.tiny_graphics.Webgl_Manager =
 
         this.set_size( dimensions );
         gl.clearColor.apply( gl, background_color );    // Tell the GPU which color to clear the canvas with each frame.
+        gl.getExtension( "OES_element_index_uint" );
         gl.enable( gl.DEPTH_TEST );   gl.enable( gl.BLEND );            // Enable Z-Buffering test with blending.
         gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );           // Specify an interpolation method for blending "transparent"
                                                                         // triangles over the existing pixels.
@@ -497,7 +588,7 @@ window.Webgl_Manager = window.tiny_graphics.Webgl_Manager =
         this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);        // Clear the canvas's pixels and z-buffer.
 
         for( let live_string of document.querySelectorAll(".live_string") ) live_string.onload( live_string );
-        for ( let s of this.scene_components ) s.display( this.globals.graphics_state );            // Draw each registered animation.
+        for ( let s of this.scene_components ) s.display( this, this.globals.graphics_state );            // Draw each registered animation.
         this.event = window.requestAnimFrame( this.render.bind( this ) );   // Now that this frame is drawn, request that render() happen
       }                                                                     // again as soon as all other web page events are processed.
     }
@@ -555,7 +646,7 @@ window.Scene_Component = window.tiny_graphics.Scene_Component =
           this.shapes[s].copy_onto_graphics_card( webgl_manager.gl );
         }
       }                                                          // You have to override the following functions to use class Scene_Component.
-      make_control_panel(){}  display( graphics_state ){}  show_explanation( document_section ){}
+      make_control_panel(){}  display( context, graphics_state ){}  show_explanation( document_section ){}
     }
 
 

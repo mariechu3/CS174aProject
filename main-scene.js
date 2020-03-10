@@ -48,7 +48,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       spike: new SpikeBall(15, 15, [2, 2]),
       square: new Square(),
       frame: new Cube_Outline(),
-      avatar: new Shape_From_File("assets/cartoonboy.obj"),
+      avatar: new Shape_From_File("assets/bottle.obj"),
       balloon: new Balloon(20,20,[1,1]),
       string: new String(20,20,[1,1])
     };
@@ -56,6 +56,11 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     shapes.box_1.texture_coords = shapes.box_1.texture_coords.map(v => Vec.of(v[0] * 4, v[1] * 6));
     shapes.box_4.texture_coords = shapes.box_4.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 4));
     this.submit_shapes(context, shapes);
+
+    this.bumps = new tiny.Material(new defs.Fake_Bump_Map(1), {
+      color: tiny.color(0, 0, 0, 1),
+      ambient: 1, diffusivity: 1, specularity: 0.1, texture: new tiny.Texture("./assets/cloths.jpg")
+    });
 
     // Make some Material objects available to you:
     this.materials = {
@@ -284,7 +289,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
   draw_balloon_help(graphics_state,pos,t){
     this.draw_balloon(graphics_state, [pos[0], [pos[1][0], pos[1][1], pos[1][2], (pos[1][3] + 0.25 * Math.sin(t))], pos[2], pos[3]]);
   }
-  display(graphics_state) {
+  display(context, graphics_state) {
     graphics_state.lights = this.lights; // Use the lights stored in this.lights.
     const t = graphics_state.animation_time / 1000,
         dt = graphics_state.animation_delta_time / 1000;
@@ -296,13 +301,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     if(this.avatar_pos[1][3]>0)
       this.avatar_pos[1][3] -= dt;
     //console.log (this.avatar_pos)
-    this.shapes.spike.draw(
-        graphics_state,
-        this.avatar_pos,
-        this.materials.avatar
-    );
+    // this.shapes.spike.draw(
+    //     graphics_state,
+    //     this.avatar_pos,
+    //     this.materials.avatar
+    // );
 
-    this.shapes.avatar.draw(graphics_state, this.avatar_pos,this.materials.avatar);
+    this.shapes.avatar.draw(context,graphics_state,this.avatar_pos,this.materials.avatar);
     this.draw_balloon_help(graphics_state,this.avatar_pos,t);
 
     //draw reflected cases
@@ -566,7 +571,7 @@ window.Main_Scene = window.classes.Main_Scene = class Main_Scene extends Scene_C
     this.pos[i][1] = [this.pos[i][1][0],this.pos[i][1][1],this.pos[i][1][2],this.pos[i][1][3]+(mult1*Math.random()*3)];
     this.pos[i][2] = [this.pos[i][2][0],this.pos[i][2][1],this.pos[i][2][2],this.pos[i][2][3]+(mult2*Math.random()*3)];
   }
-  display(graphics_state) {
+  display(context, graphics_state) {
     graphics_state.lights = this.lights; // Use the lights stored in this.lights.
     const t = graphics_state.animation_time / 1000,
         dt = graphics_state.animation_delta_time / 1000;

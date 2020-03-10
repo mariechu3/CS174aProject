@@ -103,8 +103,9 @@ const Vector = (tiny.Vector = class Vector extends Float32Array {
       return acc + x * b[i];
     }, 0);
   }
-  static cast(...args) // cast(): For compact syntax when declaring lists.
-  {
+  static cast(
+    ...args // cast(): For compact syntax when declaring lists.
+  ) {
     return args.map(x => Vector.from(x));
   }
   // to3() / to4() / cross():  For standardizing the API with Vector3/Vector4, so
@@ -230,8 +231,9 @@ const Vector3 = (tiny.Vector3 = class Vector3 extends Float32Array {
     };
     return Vector3.unsafe(x, y, z);
   }
-  to4(is_a_point) // to4():  Convert to a homogeneous vector of 4 values.
-  {
+  to4(
+    is_a_point // to4():  Convert to a homogeneous vector of 4 values.
+  ) {
     return vec4(this[0], this[1], this[2], +is_a_point);
   }
   to_string() {
@@ -694,7 +696,8 @@ const Keyboard_Manager = (tiny.Keyboard_Manager = class Keyboard_Manager {
   key_down_handler(event) {
     if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return; // Don't interfere with typing.
     this.actively_pressed_keys.add(event.key); // Track the pressed key.
-    for (let saved of Object.values(this.saved_controls)) { // Re-check all the keydown handlers.
+    for (let saved of Object.values(this.saved_controls)) {
+      // Re-check all the keydown handlers.
       if (
         saved.shortcut_combination.every(s =>
           this.actively_pressed_keys.has(s)
@@ -864,16 +867,22 @@ const Vertex_Buffer = (tiny.Vertex_Buffer = class Vertex_Buffer extends Graphics
     // draw():  To appear onscreen, a shape of any variety goes through this function,
     // which executes the shader programs.  The shaders draw the right shape due to
     // pre-selecting the correct buffer region in the GPU that holds that shape's data.
-    const gpu_instance = this.activate(webgl_manager.context);
+    const gpu_instance = this.activate(
+      webgl_manager.context || webgl_manager.gl
+    );
     material.shader.activate(
-      webgl_manager.context,
+      webgl_manager.context || webgl_manager.gl,
       gpu_instance.webGL_buffer_pointers,
       program_state,
       model_transform,
       material
     );
     // Run the shaders to draw every triangle now:
-    this.execute_shaders(webgl_manager.context, gpu_instance, type);
+    this.execute_shaders(
+      webgl_manager.context || webgl_manager.gl,
+      gpu_instance,
+      type
+    );
   }
 });
 

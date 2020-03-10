@@ -875,7 +875,7 @@ class Movement_Controls extends Scene_Component    // Movement_Controls is a Sce
       do_operation( Mat4.rotation( radians_per_frame * dragging_vector.norm(), Vec.of( dragging_vector[1], dragging_vector[0], 0 ) ) );
       do_operation( Mat4.translation([ 0,0, sign * -25 ]) );
     }
-  display( graphics_state, dt = graphics_state.animation_delta_time / 1000 )    // Camera code starts here.
+  display( context, graphics_state, dt = graphics_state.animation_delta_time / 1000 )    // Camera code starts here.
     { const m = this.speed_multiplier * this. meters_per_frame,
             r = this.speed_multiplier * this.radians_per_frame;
       this.first_person_flyaround( dt * r, dt * m );     // Do first-person.  Scale the normal camera aiming speed by dt for smoothness.
