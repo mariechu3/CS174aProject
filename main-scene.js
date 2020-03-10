@@ -391,7 +391,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 beer: new Cylindrical_Tube(15, 15, [20,20]),
                 ground: new Cube()
             };
-            //shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 20));
+
+            shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 6, v[1] * 6));
             shapes.ground.texture_coords = shapes.ground.texture_coords.map(v => Vec.of(v[0] * 40, v[1] * 20));
 
             this.submit_shapes(context, shapes);
@@ -406,9 +407,13 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
                     beer : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/heineken.png", true)}),
                     flag : context.get_instance(Flag_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/flag.png", true)}),
-                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/classic.jpg", true)}),
-                    wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/high_res_wood_tile.jpg", true)}),
-                    table_wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/table_wood.jpg", true)}),
+
+                    wood_tile : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/high_res_wood_tile.jpg", true)}),
+                    wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/wood.png", true)}),
+                    white_wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/table_wood.jpg", true)}),
+                    brick : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/brick.jpg", true)}),
+                    marvel : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/fun.jpg", true)}),
+                    silk : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/silk_fabric.jpg", true)}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -453,7 +458,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.front_view = Mat4.identity()
                 .times(Mat4.translation([-120,0,0]))
                 .times(Mat4.rotation(-1*Math.PI/2, Vec.of(0,1,0)));
-
 
             this.score = 0;
             this.max_socre = 0;
@@ -578,59 +582,189 @@ window.Dart_Scene= window.classes.Dart_Scene =
             let transform = Mat4.identity()
                 .times(Mat4.translation([0, -90, -450]))
                 .times(Mat4.scale([200, 10, 100]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+            this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             // 4 legs (length: 100)
             // front 2 legs
             transform = Mat4.identity()
                 .times(Mat4.translation([-150, -200, -400]))
                 .times(Mat4.scale([10, 100, 10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+            this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             transform = Mat4.identity()
                 .times(Mat4.translation([150, -200, -400]))
                 .times(Mat4.scale([10, 100, 10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+            this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             // back 2 legs
             transform = Mat4.identity()
                 .times(Mat4.translation([-150, -200, -500]))
                 .times(Mat4.scale([10, 100, 10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
+            this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             transform = Mat4.identity()
                 .times(Mat4.translation([150, -200, -500]))
                 .times(Mat4.scale([10, 100, 10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.table_wood);
-
-
+            this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
         }
 
-        draw_ground(graphics_state) {
-            // ground
-            let transform = Mat4.identity()
-                .times(Mat4.translation([0,-200,0] ))
-                .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
-                .times(Mat4.scale([1000,1000,1]));
+        draw_left_wall(graphics_state) {
+            let x = 500;
+            let y = 200;
+            let z = 10;
+            let rot_angle = Math.PI/2;
 
-            this.shapes.ground.draw(graphics_state, transform, this.materials.wood);
+            let transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,100,-400]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,100,-200]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,100,0]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,100,200]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,100,400]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            // bottom part
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,-100,-400]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,-100,-200]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,-100,0]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,-100,200]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x,-100,400]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+        }
+
+        draw_back_wall(graphics_state) {
+            let x = -600;
+            let y = 200;
+            let z = 10;
+            let rot_angle = Math.PI/2;
+
+            let transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([-400,100,x]));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([-200,100,x]));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([0,100,x]));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([200,100,x]));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([400,100,x]));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            // bottom part
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([-400,-100,x]));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([-200,-100,x]));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([0,-100,x]));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([200,-100,x]));
+            transform = transform.times(Mat4.scale([50,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([400,-100,x]));
+            transform = transform.times(Mat4.scale([150,y,z]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
         }
 
         draw_background(graphics_state) {
-            let transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([0,100,-750]));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([1000,1000,0]));
-            this.shapes.background_wall.draw(graphics_state, transform, this.materials.fabric);
 
+            this.draw_table(graphics_state, 1,2,3);
+            this.draw_left_wall(graphics_state);
+            this.draw_back_wall(graphics_state);
+
+
+            let transform = Mat4.identity();
+            //transform = transform.times(Mat4.translation([-200,100,-700]));
+            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            //transform = transform.times(Mat4.scale([700,700,10]));
+            //this.shapes.bar.draw(graphics_state, transform, this.materials.marvel);
+
+            /*
             transform = Mat4.identity();
             transform = transform.times(Mat4.translation([0,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
             transform = transform.times(Mat4.scale([10,10,10]));
             this.shapes.beer.draw(graphics_state, transform, this.materials.beer);
+            */
 
-            this.draw_table(graphics_state, 1,2,3);
-            this.draw_ground(graphics_state);
+            // ground
+            transform = Mat4.identity()
+                .times(Mat4.translation([0,-300,0] ))
+                .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
+                .times(Mat4.scale([700,700,0]));
+
+            this.shapes.ground.draw(graphics_state, transform, this.materials.silk);
+
+
+
         }
 
         draw_dart(graphics_state) {
@@ -805,7 +939,14 @@ window.Dart_Scene= window.classes.Dart_Scene =
         }
 
         draw_board(graphics_state) {
+
             let transform = Mat4.identity();
+            /*transform = transform.times(Mat4.translation([105,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([80,80,0]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.wood);*/
+
+            transform = Mat4.identity();
             transform = transform.times(Mat4.translation([100,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([50,50,0]));
