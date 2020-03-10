@@ -501,7 +501,7 @@ window.Webgl_Manager = window.tiny_graphics.Webgl_Manager =
         this.event = window.requestAnimFrame( this.render.bind( this ) );   // Now that this frame is drawn, request that render() happen
       }                                                                     // again as soon as all other web page events are processed.
     }
-
+/*
 window.Scene_Component = window.tiny_graphics.Scene_Component =
     class Scene_Component       // The Scene_Component superclass is the base class for any scene part or code snippet that you can add to a
     {                           // canvas.  Make your own subclass(es) of this and override their methods "display()" and "make_control_panel()"
@@ -557,7 +557,62 @@ window.Scene_Component = window.tiny_graphics.Scene_Component =
       }                                                          // You have to override the following functions to use class Scene_Component.
       make_control_panel(){}  display( graphics_state ){}  show_explanation( document_section ){}
     }
-
+*/
+window.Scene_Component = window.tiny_graphics.Scene_Component =
+    class Scene_Component       // The Scene_Component superclass is the base class for any scene part or code snippet that you can add to a
+    {                           // canvas.  Make your own subclass(es) of this and override their methods "display()" and "make_control_panel()"
+                                // to make them do something.  Finally, push them onto your Webgl_Manager's "scene_components" array.
+      constructor( webgl_manager, control_box )
+      { const callback_behavior = ( callback, event ) =>
+      { callback( event );
+        event.preventDefault();    // Fire the callback and cancel any default browser shortcut that is an exact match.
+        event.stopPropagation();   // Don't bubble the event to parent nodes; let child elements be targetted in isolation.
+      }
+        Object.assign( this, { key_controls: new Keyboard_Manager( document, callback_behavior), globals: webgl_manager.globals } );
+        control_box.appendChild( Object.assign( document.createElement("div"), { textContent: this.constructor.name, className: "control-title" } ) )
+        this.control_panel = control_box.appendChild( document.createElement( "div" ) );
+        this.control_panel.className = "control-div";
+      }
+      new_line( parent=this.control_panel ) { parent.appendChild( document.createElement( "br" ) ) }    // Format a scene's control panel.
+      live_string( callback, parent=this.control_panel )    // Create an element somewhere in the control panel that does reporting of the
+      {                                                   // scene's values in real time.  The event loop will constantly update all HTML
+        // elements made this way.
+        parent.appendChild( Object.assign( document.createElement( "div"  ), { className:"live_string", onload: callback } ) );
+      }
+      key_triggered_button( description, shortcut_combination, callback, color = '#'+Math.random().toString(9).slice(-6),
+                            release_event, recipient = this, parent = this.control_panel )      // Trigger any scene behavior by assigning a key
+      { const button = parent.appendChild( document.createElement( "button" ) );              // shortcut and a labelled HTML button to it.
+        button.default_color = button.style.backgroundColor = color;
+        const  press = () => { Object.assign( button.style, { 'background-color' : 'red',
+              'z-index': "1", 'transform': "scale(2)" } );
+              callback.call( recipient );
+            },
+            release = () => { Object.assign( button.style, { 'background-color' : button.default_color,
+              'z-index': "0", 'transform': "scale(1)" } );
+              if( !release_event ) return;
+              release_event.call( recipient );
+            };
+        const key_name = shortcut_combination.join( '+' ).split( " " ).join( "Space" );
+        button.textContent = "(" + key_name + ") " + description;
+        button.addEventListener( "mousedown" , press );
+        button.addEventListener( "mouseup",  release );
+        button.addEventListener( "touchstart", press, { passive: true } );
+        button.addEventListener( "touchend", release, { passive: true } );
+        if( !shortcut_combination ) return;
+        this.key_controls.add( shortcut_combination, press, release );
+      }
+      submit_shapes( webgl_manager, shapes )            // Call this to start using a set of shapes.  It ensures that this scene as well as the
+      // Webgl_Manager has pointers to the shapes when needed.  It also loads each shape onto
+      { if( !this.shapes ) this.shapes = {};          // the GPU if other scenes haven't done so already.  The shapes will be accessible from
+        for( let s in shapes )                        // a scene by calling "this.ahapes".
+        { if( webgl_manager.shapes_in_use[s] )                 // If two scenes give any shape the same name as an existing one, the
+          this.shapes[s] = webgl_manager.shapes_in_use[s];   // existing one is used instead and the new shape is thrown out.
+        else this.shapes[s] = webgl_manager.shapes_in_use[s] = shapes[s];
+          this.shapes[s].copy_onto_graphics_card( webgl_manager.gl );
+        }
+      }                                                          // You have to override the following functions to use class Scene_Component.
+      make_control_panel(){}  display( graphics_state ){}  show_explanation( document_section ){}
+    }
 
 window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
     class Canvas_Widget                    // Canvas_Widget embeds a WebGL demo onto a website, along with various panels of controls.

@@ -1,3 +1,4 @@
+
 window.Shape_From_File = window.classes.Shape_From_File =
 class Shape_From_File extends Shape {
   // **Shape_From_File** is a versatile standalone Shape that imports
@@ -84,9 +85,9 @@ class Shape_From_File extends Shape {
     {
       const {verts, norms, textures} = unpacked;
       for (var j = 0; j < verts.length / 3; j++) {
-        this.arrays.position.push(vec3(verts[3 * j], verts[3 * j + 1], verts[3 * j + 2]));
-        this.arrays.normal.push(vec3(norms[3 * j], norms[3 * j + 1], norms[3 * j + 2]));
-        this.arrays.texture_coord.push(vec(textures[2 * j], textures[2 * j + 1]));
+        this.positions.push(vec3(verts[3 * j], verts[3 * j + 1], verts[3 * j + 2]));
+        this.normals.push(vec3(norms[3 * j], norms[3 * j + 1], norms[3 * j + 2]));
+        this.texture_coords.push(vec(textures[2 * j], textures[2 * j + 1]));
       }
       this.indices = unpacked.indices;
     }
@@ -94,10 +95,10 @@ class Shape_From_File extends Shape {
     this.ready = true;
   }
 
-  draw(context, program_state, model_transform, material) {               // draw(): Same as always for shapes, but cancel all
+  draw(program_state, model_transform, material) {               // draw(): Same as always for shapes, but cancel all
     // attempts to draw the shape before it loads:
     if (this.ready)
-      super.draw(context, program_state, model_transform, material);
+      super.draw(program_state, model_transform, material);
   }
 }
 
@@ -432,6 +433,24 @@ window.Torus_2 = window.classes.Torus_2 =
         Surface_Of_Revolution.insert_transformed_copy_into( this, [ rows, columns, circle_points ] );
     }
     }
+window.Circle = window.classes.Circle =
+    class Circle extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( rows, columns)
+    { super( "positions", "normals" , "texture_coords");
+
+        Regular_2D_Polygon.insert_transformed_copy_into(this, [rows, columns], Mat4.translation([0,-2.4,0]).times(Mat4.scale([1,1,1.2])).times(Mat4.rotation((Math.PI) / 2, Vec.of(1, 0, 0))));
+
+    }
+    }
+window.Circle_small = window.classes.Circle_small =
+    class Circle_small extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( rows, columns)
+    { super( "positions", "normals" , "texture_coords");
+
+        Regular_2D_Polygon.insert_transformed_copy_into(this, [rows, columns], Mat4.scale([.05,.05,.05]));
+
+    }
+    }
 window.Mirror = window.classes.Mirror =
     class Mirror extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor( rows, columns )
@@ -470,6 +489,7 @@ window.SpikeBall = window.classes.SpikeBall =
     }
     }
 
+
 window.Balloon = window.classes.Balloon =
     class Balloon extends Shape
     { constructor( rows, columns, texture_range )
@@ -500,7 +520,7 @@ window.String = window.classes.String =
     { constructor( rows, columns, texture_range )
     { super( "positions", "normals", "texture_coords" );
       Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range],Mat4.scale([.025,4.2,.025]).times(Mat4.rotation((Math.PI/2), [1,0,0])));
-      Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([0,-1.8,-1.4]).times(Mat4.rotation(Math.PI/2, [1,0,0])).times(Mat4.scale([.07,.07,.05])));
+     // Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([0,-1.8,-1.4]).times(Mat4.rotation(Math.PI/2, [1,0,0])).times(Mat4.scale([.07,.07,.05])));
     }
     }
 
