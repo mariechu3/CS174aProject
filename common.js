@@ -3,7 +3,7 @@ import {tiny} from './tiny.js';
 const { Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
     Light, Shape, Material, Shader, Texture, Scene } = tiny;
 
-import {widgets} from '../tiny-graphics-widgets.js';
+import {widgets} from './tiny-graphics-widgets.js';
 Object.assign( tiny, widgets );
 
 const defs = {};

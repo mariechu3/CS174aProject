@@ -1,11 +1,11 @@
 // This file defines a lot of panels that can be placed on websites to create interactive graphics programs that use tiny-graphics.js.
 
-import {tiny} from './tiny-graphics.js';
+import {tiny} from './tiny.js';
 const { color, Scene } = tiny;           // Pull these names into this module's scope for convenience.
 
 export const widgets = {};
 
-const Canvas_Widget = widgets.Canvas_Widget =
+export const Canvas_Widget = widgets.Canvas_Widget =
 class Canvas_Widget
 {                           // **Canvas_Widget** embeds a WebGL demo onto a website in place of the given placeholder document
                             // element.  It creates a WebGL canvas and loads onto it any initial Scene objects in the 

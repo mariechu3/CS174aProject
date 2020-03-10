@@ -1,3 +1,6 @@
+import { Shape_From_File} from "./loadObject.js";
+import { defs, tiny } from './common.js';
+
 window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends Scene_Component {
   constructor(context, control_box) {
     // The scene begins by requesting the camera, shapes, and materials it will need.
