@@ -384,6 +384,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 bar: new Cube(),
                 cylinder: new Rounded_Capped_Cylinder(15,15,[2,2]),
                 cone : new Closed_Cone(15, 15, [2,2]),
+                flag: new Flag2(201),
                 wing: new Windmill(4),
                 wood: new Cube(),
                 background_wall: new Cube(),
@@ -400,9 +401,10 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     cone : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     wing : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
-                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/gray_fabric.png", true)}),
-                    wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/wood.png", true)}),
                     beer : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/heineken.png", true)}),
+                    flag: context.get_instance(Flag_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/flag.png", true)}),
+                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/black_fabric.png", true)}),
+                    wood : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5, diffusivity: 1,})
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -418,9 +420,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.power_y = 0;
             this.power_z = 0;
 
-            this.accel_x = 0;
+            this.accel_x = 0.0;
             this.accel_y = -9.8; // gravity
-            this.accel_z = 5;
+            this.accel_z = 5.0;
 
             // 0 ~ 90 (up down), -90 ~ 90 (left right)
             this.up_down_angle = 0;
@@ -448,6 +450,10 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 .times(Mat4.translation([-120,0,0]))
                 .times(Mat4.rotation(-1*Math.PI/2, Vec.of(0,1,0)));
 
+
+            this.score = 0;
+            this.max_socre = 0;
+
         }
 
         make_control_panel() {
@@ -462,7 +468,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.key_triggered_button("Restart", ["q"], this.restart, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("Front View", ["1"], ()=>this.attached=()=> this.front_view, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("Side View", ["2"],  ()=>this.attached=()=> this.initial_camera_location, '#'+Math.random().toString(9).slice(-6));
-
+            this.key_triggered_button("Change Wind Direction", ["3"],  ()=>this.accel_z=this.accel_z*-1, '#'+Math.random().toString(9).slice(-6));
+            this.key_triggered_button("More Wind", ["9"],  ()=>this.accel_z+= 1, '#'+Math.random().toString(9).slice(-6));
+            this.key_triggered_button("Less Wind", ["0"],  ()=>this.accel_z-= 1, '#'+Math.random().toString(9).slice(-6));
         }
 
         start_charging() {
@@ -697,8 +705,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
         // Determine only based on x-axis
         // position can be vec3
         detect_collision(dart_pos, board_pos, board_rad) {
-            let x_offset = Math.abs(dart_pos[0]-board_pos[0]);
-            if (x_offset <= 1 && this.compute_distance(dart_pos, board_pos) <= board_rad) {
+            let x_offset = Math.abs(dart_pos[0] - board_pos[0]);
+
+            if (x_offset <= 2 && this.compute_distance(dart_pos, board_pos) <= board_rad) {
                 // collision
                 return true;
             }
@@ -707,26 +716,23 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
         compute_score(dart_pos, board_pos, board_rad) {
 
-            let z_offset = dart_pos[2] - board_pos[2];
-            let y_offset = dart_pos[1] - board_pos[1];
+            let z_offset = Math.abs(dart_pos[2] - board_pos[2]);
+            let y_offset = Math.abs(dart_pos[1] - board_pos[1]);
 
-            if (z_offset === 0 && y_offset === 0) {
+            if (z_offset <= board_rad * 0.1 && y_offset <= board_rad * 0.1) {
                 console.log("Bulls EYE");
+                this.score = 100;
+            } else if (z_offset <= board_rad * 0.3 && y_offset <= board_rad * 0.3) {
+                this.score = 70;
+            } else if (z_offset <= board_rad * 0.5 && y_offset <= board_rad * 0.5) {
+                this.score = 40;
+            } else if (z_offset <= board_rad * 0.7 && y_offset <= board_rad * 0.7) {
+                this.score = 10;
+            } else {
+                this.score = 0;
             }
 
-            if (z_offset < 0)
-                if (y_offset < 0) {
-                    console.log("Score 10");
-                } else {
-                    console.log("Score 20");
-                }
-             else {
-                if (y_offset < 0) {
-                    console.log("Score 30");
-                } else {
-                    console.log("Score 40");
-                }
-            }
+            this.max_socre = Math.max(this.max_socre, this.score);
         }
 
         decompose_power_x_y_z(power, up_down_angle, left_right_angle) {
@@ -754,12 +760,47 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.left_right_angle = -1 * Math.atan(this.power_z / this.power_x);
         }
 
-        draw_board(graphics_state){
+        draw_board(graphics_state) {
             let transform = Mat4.identity();
             transform = transform.times(Mat4.translation([100,0,0]));
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([50,50,0]));
             this.shapes.bar.draw(graphics_state, transform, this.materials.board);
+        }
+
+        draw_flag(graphics_state) {
+            let flag_loc;
+            let flag_rot;
+            if (this.accel_z > 0) {
+                flag_loc = [30,50,0];
+                flag_rot = 0;
+            } else {
+                flag_loc = [30,50,-40];
+                flag_rot = Math.PI;
+            }
+            let flag_transform = Mat4.identity()
+                .times(Mat4.translation(flag_loc))
+                .times(Mat4.rotation(flag_rot, Vec.of(0,1,0)))
+                .times(Mat4.rotation(Math.PI, Vec.of(1,0,0))) // upside down
+                .times(Mat4.rotation(Math.PI / 2, Vec.of(0,1,0))) // same direction with the board
+                .times(Mat4.scale([20,20,20]));
+
+            let stick_transform = Mat4.identity()
+                .times(Mat4.translation([30,40,-20]))
+                .times(Mat4.scale([1,20,0.1]));
+
+            this.shapes.bar.draw(graphics_state, stick_transform, this.materials.bar);
+            this.shapes.flag.draw(graphics_state, flag_transform, this.materials.flag.override({ wind: this.accel_z } ) );
+        }
+
+        update_stat() {
+            // look up the elements we want to affect
+            document.getElementById("score").innerText = this.score.toFixed(2).toString();
+            document.getElementById("max_score").innerText = this.max_socre.toFixed(2).toString();
+            document.getElementById("power").innerText = this.power.toFixed(2).toString();
+            document.getElementById("wind").innerText = this.accel_z.toFixed(2).toString();
+            document.getElementById("up_down_angle").innerText = (this.up_down_angle * 180 / Math.PI).toFixed(2).toString(2);
+            document.getElementById("left_right_angle").innerText = (this.left_right_angle * 180 / Math.PI).toFixed(2).toString(2);
         }
 
         display(graphics_state) {
@@ -772,9 +813,10 @@ window.Dart_Scene= window.classes.Dart_Scene =
             } else {
                 this.curr_time = t;
             }
+
             // set up the power charging bar
-            this.set_bar_transform();
-            this.shapes.bar.draw(graphics_state, this.bar_transform, this.materials.bar);
+            // this.set_bar_transform();
+            // this.shapes.bar.draw(graphics_state, this.bar_transform, this.materials.bar);
 
             if(this.shoot){
                 this.apply_accel(dt);
@@ -790,7 +832,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             // draw the dart that consists of 9 pieces
             this.draw_dart(graphics_state);
-
             // draw the board
             this.draw_board(graphics_state);
 
@@ -798,10 +839,11 @@ window.Dart_Scene= window.classes.Dart_Scene =
             if (this.detect_collision(this.dart_pos, this.board_pos, 50)) {
                 console.log("Detected Collision");
                 this.shoot = false;
-                let score = this.compute_score(this.dart_pos, this.board_pos, 50);
-                console.log("Score: ", score);
-                this.restart();
+                this.compute_score(this.dart_pos, this.board_pos, 50);
             }
+
+            // flag
+            this.draw_flag(graphics_state);
 
             // set camera if necessary
             if (this.attached !== undefined) {
@@ -809,7 +851,132 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     .map( (x, i) => Vec.from( graphics_state.camera_transform[i] ).mix( x, 0.1 ));
             }
 
+            this.update_stat();
+
         }
     };
 
+class Flag_Shader extends Phong_Shader
+{
 
+    material( color, properties )     // Define an internal class "Material" that stores the standard settings found in Phong lighting.
+    {
+        return new class Material       // Possible properties: ambient, diffusivity, specularity, smoothness, gouraud, texture.
+    { constructor( shader, color = Color.of( 0,0,0,1 ), ambient = 0, diffusivity = 1, specularity = 1, smoothness = 40, wind= 5.0)
+    { Object.assign( this, { shader, color, ambient, diffusivity, specularity, smoothness, wind } );  // Assign defaults.
+        Object.assign( this, properties );                                                        // Optionally override defaults.
+    }
+        override( properties )                      // Easily make temporary overridden versions of a base material, such as
+        { const copied = new this.constructor();  // of a different color or diffusivity.  Use "opacity" to override only that.
+            Object.assign( copied, this );
+            Object.assign( copied, properties );
+            copied.color = copied.color.copy();
+            if( properties[ "opacity" ] != undefined ) copied.color[3] = properties[ "opacity" ];
+            return copied;
+        }
+    }( this, color );
+    }
+
+    update_GPU( g_state, model_transform, material, gpu = this.g_addrs, gl = this.gl )
+    {
+        // First, send the matrices to the GPU, additionally cache-ing some products of them we know we'll need:
+        this.update_matrices( g_state, model_transform, gpu, gl );
+        gl.uniform1f ( gpu.animation_time_loc, g_state.animation_time / 1000 );
+
+        if( g_state.gouraud === undefined ) { g_state.gouraud = g_state.color_normals = false; }    // Keep the flags seen by the shader
+        gl.uniform1i( gpu.GOURAUD_loc,        g_state.gouraud || material.gouraud );                // program up-to-date and make sure
+        gl.uniform1i( gpu.COLOR_NORMALS_loc,  g_state.color_normals );                              // they are declared.
+
+        gl.uniform4fv( gpu.shapeColor_loc,     material.color       );    // Send the desired shape-wide material qualities
+        gl.uniform1f ( gpu.ambient_loc,        material.ambient     );    // to the graphics card, where they will tweak the
+        gl.uniform1f ( gpu.diffusivity_loc,    material.diffusivity );    // Phong lighting formula.
+        gl.uniform1f ( gpu.specularity_loc,    material.specularity );
+        gl.uniform1f ( gpu.smoothness_loc,     material.smoothness  );
+        gl.uniform1f ( gpu.wind_loc,           material.wind  );
+
+        if( material.texture )                           // NOTE: To signal not to draw a texture, omit the texture parameter from Materials.
+        { gpu.shader_attributes["tex_coord"].enabled = true;
+            gl.uniform1f ( gpu.USE_TEXTURE_loc, 1 );
+            gl.bindTexture( gl.TEXTURE_2D, material.texture.id );
+        }
+        else  { gl.uniform1f ( gpu.USE_TEXTURE_loc, 0 );   gpu.shader_attributes["tex_coord"].enabled = false; }
+
+        if( !g_state.lights.length )  return;
+        var lightPositions_flattened = [], lightColors_flattened = [], lightAttenuations_flattened = [];
+        for( var i = 0; i < 4 * g_state.lights.length; i++ )
+        { lightPositions_flattened                  .push( g_state.lights[ Math.floor(i/4) ].position[i%4] );
+            lightColors_flattened                     .push( g_state.lights[ Math.floor(i/4) ].color[i%4] );
+            lightAttenuations_flattened[ Math.floor(i/4) ] = g_state.lights[ Math.floor(i/4) ].attenuation;
+        }
+        gl.uniform4fv( gpu.lightPosition_loc,       lightPositions_flattened );
+        gl.uniform4fv( gpu.lightColor_loc,          lightColors_flattened );
+        gl.uniform1fv( gpu.attenuation_factor_loc,  lightAttenuations_flattened );
+    }
+
+    shared_glsl_code()            // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
+    { return `precision mediump float;
+        const int N_LIGHTS = 2;             // We're limited to only so many inputs in hardware.  Lights are costly (lots of sub-values).
+        uniform float ambient, diffusivity, specularity, smoothness, animation_time, attenuation_factor[N_LIGHTS], wind;
+        uniform bool GOURAUD, COLOR_NORMALS, USE_TEXTURE;               // Flags for alternate shading methods
+        uniform vec4 lightPosition[N_LIGHTS], lightColor[N_LIGHTS], shapeColor;
+        varying vec3 N, E;                    // Specifier "varying" means a variable's final value will be passed from the vertex shader 
+        varying vec2 f_tex_coord;             // on to the next phase (fragment shader), then interpolated per-fragment, weighted by the 
+        varying vec4 VERTEX_COLOR;            // pixel fragment's proximity to each of the 3 vertices (barycentric interpolation).
+        varying vec3 L[N_LIGHTS], H[N_LIGHTS];
+        varying float dist[N_LIGHTS];
+        varying float varSlope;
+        `;
+    }
+
+    vertex_glsl_code()           // ********* VERTEX SHADER *********
+    { return `
+        attribute vec3 object_space_pos, normal;
+        attribute vec2 tex_coord;
+
+        uniform mat4 camera_transform, camera_model_transform, projection_camera_model_transform;
+        uniform mat3 inverse_transpose_modelview;
+
+        void main()
+        {   
+          // FLAG Movement
+          f_tex_coord = tex_coord;                                                           // Directly use original texture coords and interpolate between.          
+
+          float x = tex_coord.x;
+          float y = tex_coord.y;
+          float t = abs(wind) * -1.0 * animation_time; // this contant value should be the power of wind
+        
+          float h = cos( t + x * 10.0 );
+          h += cos( x * 3.0 - t * 0.1751 );
+          y += h * x * 0.2;
+                
+          // compute slope
+          float x2 = x - 0.001;
+          float h2 = cos( t + x2 * 10.0 );
+          h2 += cos( x2 * 3.0 - t * 0.1751 );
+          varSlope = h - h2;
+        
+          gl_Position = projection_camera_model_transform * vec4( 2.0 * x - 1.0, 0.5 - y, 0.0, 1.0 );
+
+        }`;
+    }
+
+    fragment_glsl_code()           // ********* FRAGMENT SHADER *********
+    {
+        return `
+        
+        uniform sampler2D texture;
+
+        void main()
+        {
+              // vec4 tex_color = vec4(0.73,0.41,0.01,1);
+              vec4 tex_color = texture2D( texture, f_tex_coord);                         // Sample the texture image in the correct place.
+              if( varSlope > 0.0 ) {
+                tex_color = mix( tex_color, vec4(0,0,0,1), varSlope * 50.0 );
+              }
+              if( varSlope < 0.0 ) {
+                tex_color = mix( tex_color, vec4(1,1,1,1), abs(varSlope) * 50.0 );
+              }
+              gl_FragColor = tex_color;
+        }`;
+    }
+}
