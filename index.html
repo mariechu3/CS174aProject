@@ -15,27 +15,33 @@
         .container {
             position: relative;
         }
-        #overlay {
+        h1 {
+            margin: 0;
+            color: skyblue;
+            text-shadow: 0 1px 0 black;
+            background-color: transparent;
+        }
+        .overlay {
             position: absolute;
             left: 10px;
             top: 10px;
+            background-color: transparent;
         }
     </style>
 </head>
 <body style="background: DarkGray">       <!-- Begin typing your web page here. //-->
 
 <!-- The following code embeds a WebGL canvas panel widget with certain scenes and their controls. //-->
-<div id="main-canvas" class="canvas-widget">
-    <div class="container">
-        <div id="overlay">
-            <div>Score: <span id="score"></span></div>
-            <div>Max Score: <span id="max_score"></span></div>
-            <div>Power: <span id="power"></span></div>
-            <div>Wind: <span id="wind"></span></div>
-            <div>Up-Down Angle: <span id="up_down_angle"></span></div>
-            <div>Left-Right Angle: <span id="left_right_angle"></span></div>
+<div id="main-canvas" class="canvas-widget" style="background-color: transparent">
+    <div class="container" style="background-color: transparent">
+        <div class="overlay" style="background-color: transparent">
+                <h1><div style="background-color: transparent">Score: <span id="score"></span></div></h1>
+                <h1><div style="background-color: transparent">Max Score: <span id="max_score"></span></div></h1>
+                <h1><div style="background-color: transparent">Power: <span id="power"></span></div></h1>
+                <h1><div style="background-color: transparent">Wind: <span id="wind"></span></div></h1>
+                <h1><div style="background-color: transparent">Up-Down Angle: <span id="up_down_angle"></span></div></h1>
+                <h1><div style="background-color: transparent">Left-Right Angle: <span id="left_right_angle"></span></div></h1>
         </div>
-    </div>
 </div>
 
 <script> "use strict"     // ********************* THE ENTRY POINT OF YOUR WHOLE PROGRAM STARTS HERE *********************

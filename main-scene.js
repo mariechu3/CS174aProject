@@ -373,8 +373,11 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 context.register_scene_component(new Movement_Controls(context, control_box.parentElement.insertCell()));
 
             context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 5, 100), Vec.of(0, 0, 0), Vec.of(0, 1, 0));
-            this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
-            this.initial_camera_location = Mat4.translation([0,0,100]).times(this.initial_camera_location);
+
+            this.initial_camera_location = Mat4.identity()
+                .times(Mat4.translation([-130,5,-10]))
+                .times(Mat4.rotation(Math.PI/-2, [0,1,0]));
+
             context.globals.graphics_state.camera_transform = Mat4.inverse(this.initial_camera_location);
 
             const r = context.width / context.height;
@@ -420,6 +423,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     brick : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/brick.jpg", true)}),
                     marvel : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/fun.jpg", true)}),
                     silk : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/silk_fabric.jpg", true)}),
+                    toystory : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/behind_dart.jpg", true)}),
+                    photo_frame : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -599,33 +604,54 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
 
         draw_table(graphics_state, x,y,z) {
+
+            let x_offset = 900;
+            let y_offset = -30;
+            let z_offset = -100;
+            let rot_angle = Math.PI / 2;
+
             // body
             let transform = Mat4.identity()
-                .times(Mat4.translation([0, -90, -450]))
-                .times(Mat4.scale([200, 10, 100]));
+                .times(Mat4.translation([x_offset, y_offset, z_offset]))
+                .times(Mat4.rotation(rot_angle, Vec.of(0,1,0)))
+                .times(Mat4.translation([0, -150, -450]))
+                .times(Mat4.scale([300, 10, 100]));
+
             this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             // 4 legs (length: 100)
             // front 2 legs
             transform = Mat4.identity()
-                .times(Mat4.translation([-150, -200, -400]))
-                .times(Mat4.scale([10, 100, 10]));
+                .times(Mat4.translation([x_offset, y_offset, z_offset]))
+                .times(Mat4.rotation(rot_angle, Vec.of(0,1,0)))
+                .times(Mat4.translation([-150, -220, -400]))
+                .times(Mat4.scale([10, 60, 10]));
+
             this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             transform = Mat4.identity()
-                .times(Mat4.translation([150, -200, -400]))
-                .times(Mat4.scale([10, 100, 10]));
+                .times(Mat4.translation([x_offset, y_offset, z_offset]))
+                .times(Mat4.rotation(rot_angle, Vec.of(0,1,0)))
+                .times(Mat4.translation([150, -220, -400]))
+                .times(Mat4.scale([10, 60, 10]));
+
             this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             // back 2 legs
             transform = Mat4.identity()
-                .times(Mat4.translation([-150, -200, -500]))
-                .times(Mat4.scale([10, 100, 10]));
+                .times(Mat4.translation([x_offset, y_offset, z_offset]))
+                .times(Mat4.rotation(rot_angle, Vec.of(0,1,0)))
+                .times(Mat4.translation([-150, -220, -500]))
+                .times(Mat4.scale([10, 60, 10]));
+
             this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
 
             transform = Mat4.identity()
-                .times(Mat4.translation([150, -200, -500]))
-                .times(Mat4.scale([10, 100, 10]));
+                .times(Mat4.translation([x_offset, y_offset, z_offset]))
+                .times(Mat4.rotation(rot_angle, Vec.of(0,1,0)))
+                .times(Mat4.translation([150, -220, -500]))
+                .times(Mat4.scale([10, 60, 10]));
+
             this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
         }
 
@@ -695,6 +721,32 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
             transform = transform.times(Mat4.scale([150,y,z]));
             this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
+
+
+            // draw photo
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x-10,100,240]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,50,10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.marvel);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x-10 + 5, 100,240]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([55,55,10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.photo_frame);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x-10, 100,370]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([50,50,10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.toystory);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([x-10 + 5, 100,370]));
+            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([55,55,10]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.photo_frame);
         }
 
         draw_back_wall(graphics_state) {
@@ -818,8 +870,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
             let transform = Mat4.identity();
 
             if(this.shoot) {
-
-
                 for (let i = 0; i < 4; i++) {
                     let ang = 1;
 
@@ -1115,13 +1165,17 @@ window.Dart_Scene= window.classes.Dart_Scene =
         draw_flag(graphics_state) {
             let flag_loc;
             let flag_rot;
+            let flag_x = 300;
+            let flag_y = -100;
+            let flag_z = -200;
             if (this.accel_z > 0) {
-                flag_loc = [30,50,0];
+                flag_loc = [flag_x, flag_y, 0 + flag_z];
                 flag_rot = 0;
             } else {
-                flag_loc = [30,50,-40];
+                flag_loc = [flag_x, flag_y,-40 + flag_z];
                 flag_rot = Math.PI;
             }
+
             let flag_transform = Mat4.identity()
                 .times(Mat4.translation(flag_loc))
                 .times(Mat4.rotation(flag_rot, Vec.of(0,1,0)))
@@ -1130,7 +1184,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 .times(Mat4.scale([20,20,20]));
 
             let stick_transform = Mat4.identity()
-                .times(Mat4.translation([30,40,-20]))
+                .times(Mat4.translation([flag_x,flag_y-10,-20 + flag_z]))
                 .times(Mat4.scale([1,20,0.1]));
 
             this.shapes.bar.draw(graphics_state, stick_transform, this.materials.bar);
