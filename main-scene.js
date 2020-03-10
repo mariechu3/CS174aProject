@@ -386,7 +386,10 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 cone : new Closed_Cone(15, 15, [2,2]),
                 wing: new Windmill(4),
                 wood: new Cube(),
+                background_wall: new Cube(),
+                beer: new Cylindrical_Tube(15, 15, [20,20]),
             };
+            shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 100, v[1] * 100));
             this.submit_shapes(context, shapes);
 
             // Make some Material objects available to you:
@@ -397,8 +400,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     cone : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     wing : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5}),
                     board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
-                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/black_fabric.png", true)}),
-                    wood : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 0.5, diffusivity: 1,}),
+                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/gray_fabric.png", true)}),
+                    wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/wood.png", true)}),
+                    beer : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/heineken.png", true)}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -557,76 +561,24 @@ window.Dart_Scene= window.classes.Dart_Scene =
         }
 
         draw_background(graphics_state) {
-            // transform = transform.times(Mat4.translation([-400,0,-500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([-200,0,-500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([0,0,-500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([200,0,-500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([400,0,-500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([450,0,-500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            let transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([0,0,-500]));
             // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([450,0,-300]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.scale([500,500,0]));
+            this.shapes.background_wall.draw(graphics_state, transform, this.materials.fabric);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([0,-100,-450]));
             // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([450,0,-100]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([450,0,100]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([450,0,300]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
-            //
-            // transform = Mat4.identity();
-            // transform = transform.times(Mat4.translation([450,0,500]));
-            // // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
-            // transform = transform.times(Mat4.scale([50,50,0]));
-            // this.shapes.bar.draw(graphics_state, transform, this.materials.fabric);
+            transform = transform.times(Mat4.scale([100,10,50]));
+            this.shapes.bar.draw(graphics_state, transform, this.materials.wood);
+
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([0,0,0]));
+            transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
+            transform = transform.times(Mat4.scale([10,10,10]));
+            this.shapes.beer.draw(graphics_state, transform, this.materials.beer);
+
         }
 
         draw_dart(graphics_state) {
