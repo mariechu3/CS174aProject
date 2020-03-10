@@ -1,8 +1,5 @@
-import { tiny } from './tiny-graphics';
-const { vec, vec3, tinyShape } = tiny;
-
 window.Shape_From_File = window.classes.Shape_From_File =
-class Shape_From_File extends tinyShape {
+class Shape_From_File extends Shape {
   // **Shape_From_File** is a versatile standalone Shape that imports
   // all its arrays' data from an .obj 3D model file.
   constructor(filename) {
@@ -405,7 +402,7 @@ window.Cylindrical_Tube_2 = window.classes.Cylindrical_Tube_2 =
 
 window.Cylindrical_Tube_3 = window.classes.Cylindrical_Tube_3 =
     class Cylindrical_Tube_3 extends Surface_Of_Revolution    // An open tube shape with equally sized sections, pointing down Z locally.
-    { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [.2, 0, .5], [1, 1, -1] ), texture_range ); } }
+    { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [.1, 0, 1], [.96, .96, -1] ), texture_range ); } }
 
 window.Cone_Tip = window.classes.Cone_Tip =
 class Cone_Tip extends Surface_Of_Revolution        // Note:  Touches the Z axis; squares degenerate into triangles as they sweep around.
@@ -423,6 +420,18 @@ class Torus extends Shape                                         // Build a don
         Surface_Of_Revolution.insert_transformed_copy_into( this, [ rows, columns, circle_points ] );         
       }
   }
+window.Torus_2 = window.classes.Torus_2 =
+    class Torus_2 extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( rows, columns )
+    { super( "positions", "normals", "texture_coords" );
+        const circle_points = Array( rows ).fill( Vec.of( .75,0,0 ) )
+            .map( (p,i,a) => Mat4.translation([ -20,0,0 ])
+                .times( Mat4.rotation( i/(a.length-1) * 2*Math.PI, Vec.of( 0,-1,0 ) ) )
+                .times( p.to4(1) ).to3() );
+
+        Surface_Of_Revolution.insert_transformed_copy_into( this, [ rows, columns, circle_points ] );
+    }
+    }
 window.Mirror = window.classes.Mirror =
     class Mirror extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor( rows, columns )
@@ -460,26 +469,41 @@ window.SpikeBall = window.classes.SpikeBall =
       Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.65,.65,.65]));
     }
     }
+
 window.Balloon = window.classes.Balloon =
     class Balloon extends Shape
     { constructor( rows, columns, texture_range )
     { super( "positions", "normals", "texture_coords" );
-      Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.scale([.025,.025,2]))//.times(Mat4.rotation((Math.PI/2*0), [0,0,1])))
-      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,.85,0]).times(Mat4.scale([.69,.69,.69])).times(Mat4.rotation((Math.PI/2), [1,0,0])))
-      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([0,2,0]).times(Mat4.scale([1.05,1.10,1.05])));
+      //Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range],Mat4.scale([.025,4,.025]).times(Mat4.rotation((Math.PI/2), [1,0,0])))
+      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,2.81,0]).times(Mat4.scale([.69,.69,.69])).times(Mat4.rotation((Math.PI/2), [1,0,0])))
+      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,2.25,0]).times(Mat4.scale([.15,.15,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([0,4.05,0]).times(Mat4.scale([1.05,1.10,1.05])));
+    }
+    }
+window.Subdivision_Sphere_small = window.classes.Subdivision_Sphere_small =
+    class Subdivision_Sphere_small extends Shape
+    { constructor( sub )
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [sub], Mat4.scale([.04,.04,.04]));
+    }
+    }
+window.Tent = window.classes.Tent =
+    class Tent extends Shape
+    { constructor( rows, columns, texture_range )
+    { super( "positions", "normals", "texture_coords" );
+        Cylindrical_Tube_2.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,-3,0]).times(Mat4.rotation(-Math.PI/2,[1,0,0])).times(Mat4.scale([8,8,5])))
+        Closed_Cone.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,2.5,0]).times(Mat4.rotation(-Math.PI/2,[1,0,0])).times(Mat4.scale([10,10,3])))
+    }
+    }
+window.String = window.classes.String =
+    class Balloon extends Shape
+    { constructor( rows, columns, texture_range )
+    { super( "positions", "normals", "texture_coords" );
+      Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range],Mat4.scale([.025,4.2,.025]).times(Mat4.rotation((Math.PI/2), [1,0,0])));
+      Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([0,-1.8,-1.4]).times(Mat4.rotation(Math.PI/2, [1,0,0])).times(Mat4.scale([.07,.07,.05])));
     }
     }
 
-window.Words = window.classes.Words =
-    class SpikeBall extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
-    { constructor( rows, columns, texture_range )
-    { super( "positions", "normals", "texture_coords" );
-      Square.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*i) / 2, Vec.of(0, 1, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
-      Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])).times(Mat4.scale([.5,.5,.5])));
-      //Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation((Math.PI*3) / 2, Vec.of(1, 0, 0)).times(Mat4.translation([0,0,1])));
-      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.65,.65,.65]));
-    }
-    }
 
 
 window.Grid_Sphere = window.classes.Grid_Sphere =
@@ -511,6 +535,12 @@ class Capped_Cylinder extends Shape                       // Combine a tube and 
         Cylindrical_Tube  .insert_transformed_copy_into( this, [ rows, columns, texture_range ] );
         Regular_2D_Polygon.insert_transformed_copy_into( this, [ 1, columns ],                                                  Mat4.translation([ 0, 0, .5 ]) );
         Regular_2D_Polygon.insert_transformed_copy_into( this, [ 1, columns ], Mat4.rotation( Math.PI, Vec.of(0, 1, 0) ).times( Mat4.translation([ 0, 0, .5 ]) ) ); } }
+window.Cylinder = window.classes.Cylinder =
+    class Cylinder extends Shape                       // Combine a tube and two regular polygons to make a closed cylinder.
+    { constructor( rows, columns, texture_range )           // Flat shade this to make a prism, where #columns = #sides.
+    { super( "positions", "normals", "texture_coords" );
+        Capped_Cylinder  .insert_transformed_copy_into( this, [ rows, columns, texture_range ], Mat4.rotation(Math.PI/2, [1,0,0]).times(Mat4.scale([.01,.01,.2])) );
+         } }
 
 window.Rounded_Capped_Cylinder = window.classes.Rounded_Capped_Cylinder =
 class Rounded_Capped_Cylinder extends Surface_Of_Revolution   // An alternative without three separate sections

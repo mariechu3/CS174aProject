@@ -9,7 +9,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       );
 
     context.globals.graphics_state.camera_transform = Mat4.look_at(
-        Vec.of(0, 5, 25),
+        Vec.of(0, 10, 25),
         Vec.of(0, 0, 0),
         Vec.of(0, 1, 0)
     );
@@ -45,10 +45,12 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       spike: new SpikeBall(15, 15, [2, 2]),
       square: new Square(),
       frame: new Cube_Outline(),
-      avatar: new Shape_From_File("assets/cartoonboy.obj")
+      avatar: new Shape_From_File("assets/cartoonboy.obj"),
+      balloon: new Balloon(20,20,[1,1]),
+      string: new String(20,20,[1,1])
     };
     shapes.box_2.texture_coords = shapes.box_2.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 6));
-    shapes.box_1.texture_coords = shapes.box_1.texture_coords.map(v => Vec.of(v[0] * 4, v[1] * 6))
+    shapes.box_1.texture_coords = shapes.box_1.texture_coords.map(v => Vec.of(v[0] * 4, v[1] * 6));
     shapes.box_4.texture_coords = shapes.box_4.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 4));
     this.submit_shapes(context, shapes);
 
@@ -71,6 +73,16 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           .material(Color.of(0, 0, 0, 1), {//(Color.of(0.8, 0.9, 1, 1)
             ambient: .6,
             texture:context.get_instance("assets/wall.jpg",true)
+          }),
+      balloon: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(1, 0, 0, .7), {
+            ambient: 0.8
+          }),
+      string: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(1, 1, 1, 1), {
+            ambient: 0.8
           }),
       mirror: context
           .get_instance(Phong_Shader)
@@ -100,7 +112,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     else if (dir === 2)
       this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0.5, 0]));
     else if (dir === 3) {
-      if (this.avatar_pos[1][3] > -4.5)
+      if (this.avatar_pos[1][3] > 0)
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, -0.5, 0]));
     } else if (dir === 4) {
       if (this.avatar_pos[2][3] > 1.0)
@@ -185,52 +197,11 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
    // this.new_line();
   }
 
-  draw_middle_mirror_and_frame(graphics_state) {
-    this.mirror_1 = Mat4.identity();
-    const mirror_model = this.mirror_1.times(Mat4.scale([0.25, 0.5, 0.05]));
-    const frame_model = mirror_model.times(Mat4.scale([1.5, 1.5, 1.5]));
-    /*this.shapes.mirror.draw(
-        graphics_state,
-        mirror_model,
-        this.materials.mirror
-    );*/
-    // TODO: [WALL_WITH_HOLES] needs to be fixed for collisions/actually have some way to just have a wall with holes in it
-    //this.shapes.frame.draw(graphics_state, frame_model, this.materials.wall);
-  }
-
-  draw_left_mirror_and_frame(graphics_state) {
-    //this.mirror_2 = Mat4.identity().times(Mat4.translation([-10, 0, 0]));
-    this.mirror_2 = Mat4.identity().times(Mat4.translation([-12, 0, 0]));
-    const mirror_model = this.mirror_2.times(Mat4.scale([0.25, 0.5, 0.05]));
-    const frame_model = mirror_model.times(Mat4.scale([1.5, 1.5, 1.5]));
-    /*this.shapes.mirror.draw(
-        graphics_state,
-        mirror_model,
-        this.materials.mirror
-    );*/
-    // TODO: [WALL_WITH_HOLES] needs to be fixed for collisions/actually have some way to just have a wall with holes in it
-    this.shapes.frame.draw(graphics_state, frame_model, this.materials.wall);
-  }
-
-  draw_right_mirror_and_frame(graphics_state) {
-    //this.mirror_3 = Mat4.identity().times(Mat4.translation([10, 0, 0]));
-    this.mirror_3 = Mat4.identity().times(Mat4.translation([12, 0, 0]));
-    const mirror_model = this.mirror_3.times(Mat4.scale([0.25, 0.5, 0.05]));
-    const frame_model = mirror_model.times(Mat4.scale([1.5, 1.5, 1.5]));
-   /* this.shapes.mirror.draw(
-        graphics_state,
-        mirror_model,
-        this.materials.mirror
-    );*/
-    // TODO: [WALL_WITH_HOLES] needs to be fixed for collisions/actually have some way to just have a wall with holes in it
-    this.shapes.frame.draw(graphics_state, frame_model, this.materials.wall);
-  }
-
   setupScene(graphics_state) {
     let identity = Mat4.identity();
-    this.draw_middle_mirror_and_frame(graphics_state);
-    this.draw_left_mirror_and_frame(graphics_state);
-    this.draw_right_mirror_and_frame(graphics_state);
+    this.mirror_1 = Mat4.identity();
+    this.mirror_2 = Mat4.identity().times(Mat4.translation([-12, 0, 0]));
+    this.mirror_3 = Mat4.identity().times(Mat4.translation([12, 0, 0]));
 
 
     this.shapes.box_3.draw( //floor
@@ -302,7 +273,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
   mirror_eq(focus, obj_dist) {
     return (obj_dist * focus) / (obj_dist - focus);
   }
+  draw_balloon(graphics_state, pos){
+    this.shapes.string.draw(graphics_state,pos,this.materials.string);
+    this.shapes.balloon.draw(graphics_state, pos,this.materials.balloon);
 
+  }
+  draw_balloon_help(graphics_state,pos,t){
+    this.draw_balloon(graphics_state, [pos[0], [pos[1][0], pos[1][1], pos[1][2], (pos[1][3] + 0.25 * Math.sin(t))], pos[2], pos[3]]);
+  }
   display(graphics_state) {
     graphics_state.lights = this.lights; // Use the lights stored in this.lights.
     const t = graphics_state.animation_time / 1000,
@@ -320,7 +298,9 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         this.avatar_pos,
         this.materials.avatar
     );
-    this.shapes.avatar.draw(graphics_state, Mat4.identity(),this.materials.avatar)
+
+    this.shapes.avatar.draw(graphics_state, this.avatar_pos,this.materials.avatar);
+    this.draw_balloon_help(graphics_state,this.avatar_pos,t);
 
     //draw reflected cases
     //plane mirror
@@ -332,12 +312,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
       copy[3]
     ];
-    if (this.avatar_pos[0][3] >= -4 && this.avatar_pos[0][3] <= 4)
+    if (this.avatar_pos[0][3] >= -4 && this.avatar_pos[0][3] <= 4) {
       this.shapes.spike.draw(
           graphics_state,
           reflected_mat,
           this.materials.avatar
       );
+      this.draw_balloon_help(graphics_state,reflected_mat,t);
+    }
     //convex case will always be upright
     else if (this.avatar_pos[0][3] < -4) {
       scale =
@@ -355,6 +337,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           reflected_mat,
           this.materials.avatar
       );
+      this.draw_balloon_help(graphics_state,reflected_mat,t);
     }
     //concave cases
     else if (this.avatar_pos[0][3] > 4) {
@@ -364,10 +347,10 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             this.mirror_eq(2, this.avatar_pos[2][3]) / this.avatar_pos[2][3];
         console.log(scale);
         copy = this.avatar_pos.times(Mat4.scale([scale, scale, scale]));
-        copy = copy.times(Mat4.rotation(Math.PI/2,[0,0,1]))
+        //copy = copy.times(Mat4.rotation(Math.PI,[0,1,0])).times(Mat4.rotation(Math.PI,[0,1,0]))
         reflected_mat = [
           copy[0],
-          [1 * copy[1][0], 1 * copy[1][1], 1 * copy[1][2], 1 * copy[1][3]],
+          [1 * copy[1][0], -1 * copy[1][1], -1 * copy[1][2], -1 * copy[1][3]],
           [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
           copy[3]
         ];
@@ -388,6 +371,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           reflected_mat,
           this.materials.avatar
       );
+      this.draw_balloon_help(graphics_state,reflected_mat,t)
     }
 
     //camera coordinates
@@ -396,7 +380,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       switch (this.attached()) {
         case this.initial_camera_location:
           graphics_state.camera_transform = Mat4.look_at(
-              Vec.of(0, 5, 25),
+              Vec.of(0, 10, 25),
               Vec.of(0, 0, 0),
               Vec.of(0, 1, 0)
           ).map((x, i) =>
@@ -434,7 +418,7 @@ window.Main_Scene = window.classes.Main_Scene = class Main_Scene extends Scene_C
       );
 
     context.globals.graphics_state.camera_transform = Mat4.look_at(
-        Vec.of(0, 5, 25),
+        Vec.of(0, 5, 35),
         Vec.of(0, 0, 0),
         Vec.of(0, 1, 0)
     );
@@ -454,29 +438,74 @@ window.Main_Scene = window.classes.Main_Scene = class Main_Scene extends Scene_C
       // TODO:  Added in as many shapes as we need for this project
       cone: new Closed_Cone(20,20,[1,2]),
       cylinder_mod: new Cylindrical_Tube_2(20,20,[1,1]),
-      balloon: new Balloon(20,20,[1,1])
+      balloon: new Balloon(20,20,[1,1]),
+      tent: new Tent(20,20,[5,5]),
+      cylinder: new Cylinder(20,20,[5,5]),
+      sphere: new Subdivision_Sphere_small(4),
+      sphere_2: new Subdivision_Sphere(4),
+      cube: new Cube(),
+      cube_2: new Cube(),
+      square: new Square(),
     };
-
+    shapes.cube.texture_coords = shapes.cube.texture_coords.map(v => Vec.of(v[0] * 3, v[1] * 3));
+    shapes.cube_2.texture_coords = shapes.cube_2.texture_coords.map(v => Vec.of(v[0] * 6, v[1] * 6));
     this.submit_shapes(context, shapes);
 
     // Make some Material objects available to you:
     this.materials = {
-      tent: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1),{ambient:1, texture: context.get_instance("assets/tent.jpg",true)}),
-      balloon: context
+      firework: context
           .get_instance(Phong_Shader)
-          .material(Color.of(1, 1, 1, 1), {
-            ambient: 0.8
+          .material(Color.of(1, 0, 0, 1), {
+            ambient: .02
           }),
-
+      world: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture: context.get_instance("assets/stars.png")
+          }),
+      tent: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture: context.get_instance("assets/tent.png"),
+            specularity: 0,
+            diffusivity: 0,
+          }),
+      ground: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: .15,
+            texture: context.get_instance("assets/grass.jpg")
+          }),
+      sign: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 0.8,
+            texture: context.get_instance("assets/words.jpg"),
+            specularity: 0,
+            diffusivity: 0
+          }),
+      sign2: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture: context.get_instance("assets/words2.jpg"),
+            specularity:0,
+            diffusivity:0
+          }),
     };
 
-    this.lights = [
-      new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(0, 0, 20, 1), Color.of(1, 1, 1, 1), 1000),
-      new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)
-    ];
+    this.lights = [];
+    this.fire = [false,false,true,false,false,false,true,false,false,false];
+    this.counts = 0;
+    this.rec = 0;
+    this.pos = [Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity(),Mat4.identity()]
+    this.colors = [Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+      Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+      Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+      Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+      Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1)];
 
 
   }
@@ -486,18 +515,116 @@ window.Main_Scene = window.classes.Main_Scene = class Main_Scene extends Scene_C
 
 
   }
-
+  determine_trans(pos,num1,num2)
+  {
+    return Mat4.translation([num1,num2,0]).times(pos);
+  }
+  draw_fireworks(graphics_state, pos, rec,i)
+  {
+    if(rec == 0)
+      return
+    this.shapes.sphere.draw(graphics_state, pos, this.materials.firework)
+    let position = this.determine_trans(pos,0.75,0);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,0.375,0.649519);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,-0.375,0.649519);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,-0.75,0);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,-0.375,-0.649519);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,0.375,-0.649519);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,0.649519,0.375);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,.75,0);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,-0.649519,0.375);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,-.75,0);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+    position = this.determine_trans(pos,-0.649519,-0.375);
+    this.shapes.sphere.draw(graphics_state, position, this.materials.firework.override({color:this.colors[i]}))
+    this.draw_fireworks(graphics_state,position,rec-1,i)
+  }
+  set_pos(i,mult1,mult2)
+  {
+    this.pos[i][1] = [this.pos[i][1][0],this.pos[i][1][1],this.pos[i][1][2],this.pos[i][1][3]+(mult1*Math.random()*3)];
+    this.pos[i][2] = [this.pos[i][2][0],this.pos[i][2][1],this.pos[i][2][2],this.pos[i][2][3]+(mult2*Math.random()*3)];
+  }
   display(graphics_state) {
     graphics_state.lights = this.lights; // Use the lights stored in this.lights.
     const t = graphics_state.animation_time / 1000,
         dt = graphics_state.animation_delta_time / 1000;
     let identity = Mat4.identity();
-    let model_transform = identity.times(Mat4.translation([0,-3,0])).times(Mat4.rotation(-Math.PI/2,[1,0,0])).times(Mat4.scale([8,8,5]));
-   // this.shapes.cylinder_mod.draw(graphics_state,model_transform,this.materials.tent);
-    model_transform = identity.times(Mat4.translation([0,2.5,0])).times(Mat4.rotation(-Math.PI/2,[1,0,0])).times(Mat4.scale([10,10,3]));
-    //this.shapes.cone.draw(graphics_state,model_transform,this.materials.tent);
-    this.shapes.balloon.draw(graphics_state,identity,this.materials.balloon);
-
-
+    let model_transform = identity;
+    this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([0,-25,-45])).times(Mat4.scale([20,15,5])),this.materials.tent);
+    this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([40,-25,-50])).times(Mat4.scale([20,20,10])),this.materials.sign2);
+    this.shapes.square.draw(graphics_state,identity.times(Mat4.translation([-40,-25,-50])).times(Mat4.scale([20,20,10])),this.materials.sign);
+    //this.shapes.cylinder.draw(graphics_state,identity.times(Mat4.translation([10,0,0])),this.materials.tent);
+    if (this.counts == 103) {
+      for (let i = 0; i < 10; i++) {
+        if (Math.floor(Math.random() * 3) == 1)
+          this.fire[i] = true;
+        else
+          this.fire[i] = false;
+      }
+      this.counts = 0;
+      this.rec = 0;
+      this.colors = [Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+        Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+        Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+        Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1),
+        Color.of(Math.random(), Math.random(), Math.random(),1), Color.of(Math.random(), Math.random(), Math.random(),1)];
     }
+    if (this.counts >= 100) {
+      this.rec++;
+    }
+    this.lights = [];
+    for (let i = 0; i < 10; i++) {
+      model_transform = identity.times(Mat4.translation([i * 4 - 20, this.counts * .02, 0]))
+      if (this.counts < 100) {
+        if (this.fire[i]) {
+          this.shapes.cylinder.draw(graphics_state, model_transform, this.materials.firework)
+          this.lights.push(new Light(Vec.of(model_transform[0][3], model_transform[1][3], model_transform[2][3], 1), Color.of(1, 1, 1, 1), 1000))
+        }
+      } else if (this.counts == 100) {
+        this.pos[i] = model_transform;
+        if(Math.floor(Math.random()*2))
+        {
+          if(Math.floor(Math.random()*2))
+            this.set_pos(i,1,1)
+          else
+            this.set_pos(i,-1,1)
+        }
+        else{
+          if(Math.floor(Math.random()*2))
+            this.set_pos(i,1,-1)
+          else
+            this.set_pos(i,-1,-1)
+        }
+      }
+      else{
+        if (this.fire[i]) {
+          this.lights.push(new Light(Vec.of(this.pos[i][0][3], this.pos[i][1][3], this.pos[i][2][3], 1), Color.of(1, 1, 1, 1), 1000000))
+          this.draw_fireworks(graphics_state, this.pos[i], this.rec,i)
+        }
+      }
+    }
+    this.counts++;
+    this.shapes.cube.draw(graphics_state, Mat4.identity().times(Mat4.scale([60,60,60])), this.materials.world);
+    this.shapes.cube_2.draw(graphics_state, Mat4.identity().times(Mat4.translation([0,-50,0])).times(Mat4.scale([60,10,60])), this.materials.ground);
+  }
+
 };
