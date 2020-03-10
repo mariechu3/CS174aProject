@@ -463,6 +463,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             //random firework
             this.random_v = [];
             this.random_g = [];
+            this.random_color = [];
             this.random_x_angle = [];
             this.random_z_angle = [];
             this.random_direct = [];
@@ -475,7 +476,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             // transform: dart, board, power bar
             this.default_dart_pos = [-100 ,0, 0]; // default (based on the rightmost piece)
-            this.dart_pos = [-100 ,0, 0]; // current dart position
+            this.dart_pos = [-100 ,0, 0]; // current dart posi1tion
             this.board_pos = [100,0,0]; // default
             this.bar_transform = Mat4.identity().times(Mat4.translation([10,0,0]));
 
@@ -500,6 +501,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.key_triggered_button("Restart", ["q"], this.restart, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("Front View", ["1"], ()=>this.attached=()=> this.front_view, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("Side View", ["2"],  ()=>this.attached=()=> this.initial_camera_location, '#'+Math.random().toString(9).slice(-6));
+            this.key_triggered_button("Dart View", ["/"],  ()=>this.attached=()=> this.dart_view, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("Change Wind Direction", ["3"],  ()=>this.accel_z=this.accel_z*-1, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("More Wind", ["9"],  ()=>this.accel_z+= 1, '#'+Math.random().toString(9).slice(-6));
             this.key_triggered_button("Less Wind", ["0"],  ()=>this.accel_z-= 1, '#'+Math.random().toString(9).slice(-6));
@@ -825,12 +827,13 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
         }
 
-        draw_firework(graphics_state, t) {
+        draw_firework(graphics_state, t, position) {
             let zero_to_one = 0.5 + 0.5*Math.sin(2 * Math.PI/3*t);
             // let color = Color.of( 1, 1, 1, 1 );
 
             this.stop_firework = true;
-            for(let i = 0; i < 500; i++){
+            for(let i = 0; i < 200; i++){
+                let color = Color.of( this.random_color[i][0],  this.random_color[i][1],  this.random_color[i][2], 1 );
                 let V = this.random_v[i];
                 let g = this.random_g[i];
                 let x_angle = this.random_x_angle[i];
@@ -843,22 +846,15 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 let Vz = -1 * p_xz * Math.sin(x_angle);
 
 
-                // let Vx = V * Math.cos(x_angle) * Math.cos(z_angle);
-                // // if (x_angle < 0) Vx = V * -1* Math.cos(x_angle);
-                // let Vy = V * Math.sin(x_angle) * Math.cos(z_angle);
-                // let Vz = V * Math.cos(x_angle) * Math.sin(z_angle);
-                let max_Y = Vy * Vy / (2 * g);
-
                 let X = this.random_direct[i] * Vx* (t - this.fire_time);
                 let Y = Vy*(t - this.fire_time) - g*(t - this.fire_time)*(t - this.fire_time)/2;
                 let Z = this.random_direct[i] * Vz*(t - this.fire_time);
-                let color = Color.of( Y/max_Y, zero_to_one, 0, 1 );
-                if(Y > -10){
+                if(Y > -5){
                     let transform = Mat4.identity();
                     transform = transform.times(Mat4.translation([X,Y,Z]));
-                    transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
+                    transform = transform.times(Mat4.translation(position));
                     transform = transform.times(Mat4.scale([0.5,0.5,0.5]));
-                    this.shapes.sphere.draw(graphics_state, transform, this.materials.fire.override({color: color, ambient:Y}));
+                    this.shapes.sphere.draw(graphics_state, transform, this.materials.fire.override({color: color}));
                     this.stop_firework = false;
                 }
             }
@@ -965,6 +961,14 @@ window.Dart_Scene= window.classes.Dart_Scene =
             transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
             this.shapes.cylinder.draw(graphics_state, transform, this.materials.dart.override( {color: Color.of(251/255, 202/255, 3/255, 1), ambient:0.3, specularity: 1, diffusivity: 1}));
 
+            transform = Mat4.identity();
+            transform = transform.times(Mat4.translation([this.dart_pos[0] + x_offset, this.dart_pos[1], this.dart_pos[2]]));
+            transform = transform.times(Mat4.translation([10,0,0]));
+            transform = transform.times(Mat4.rotation(this.left_right_angle, Vec.of(0,1,0)));
+            transform = transform.times(Mat4.rotation(this.up_down_angle, Vec.of(0,0,1)));
+            transform = transform.times(Mat4.translation([-10,0,0]));
+            transform = transform.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0)));
+            this.dart_view = transform.times(Mat4.translation([-10,3,0]));
             // dart piece 2
             x_offset = -17;
             transform = Mat4.identity();
@@ -1082,21 +1086,19 @@ window.Dart_Scene= window.classes.Dart_Scene =
         get_random(){
             this.random_v = [];
             this.random_g = [];
+            this.random_color = [];
             this.random_x_angle = [];
             this.random_z_angle = [];
             this.random_direct = [];
             for(let i = 0; i < 500; i++){
                 this.random_v.push(Math.ceil(Math.random() * 20) + 10);
                 this.random_g.push(Math.ceil(Math.random() * 20) + 10);
+                this.random_color.push([Math.random(), Math.random(), Math.random()]);
                 this.random_x_angle.push(Math.PI/Math.ceil(Math.random() * 3));
                 this.random_z_angle.push(Math.PI/Math.ceil(Math.random() * 3));
                 if(Math.random()<0.5) this.random_direct.push(1);
                 else this.random_direct.push(-1);
             }
-            // console.log(this.random_v);
-            // console.log(this.random_x_angle);
-            // console.log(this.random_z_angle);
-            // console.log(this.random_direct);
         }
 
         compute_score(dart_pos, board_pos, board_rad) {
@@ -1231,7 +1233,11 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 this.bulls_eye = false;
             }
             if(this.fire_time != 0){
-                this.draw_firework(graphics_state, t);
+                this.draw_firework(graphics_state, t, [40, 40, -40]);
+                this.draw_firework(graphics_state, t, [70, 10, -60]);
+                this.draw_firework(graphics_state, t, [90, 30, 40]);
+                this.draw_firework(graphics_state, t, [40, 20, 70]);
+                this.draw_firework(graphics_state, t, [80, -20, -10]);
                 if(this.stop_firework) {
                     this.get_random();
                     this.fire_time = t;
@@ -1264,6 +1270,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
             }
 
             this.update_stat();
+
 
         }
     };
