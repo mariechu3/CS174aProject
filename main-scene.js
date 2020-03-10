@@ -390,7 +390,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 background_wall: new Cube(),
                 beer: new Cylindrical_Tube(15, 15, [20,20]),
                 triangle: new Triangle(),
-                ground: new Cube()
+                ground: new Cube(),
+                sphere: new Subdivision_Sphere(4),
             };
             //shapes.background_wall.texture_coords = shapes.background_wall.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 20));
             shapes.ground.texture_coords = shapes.ground.texture_coords.map(v => Vec.of(v[0] * 40, v[1] * 20));
@@ -407,8 +408,9 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     board: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/dart_board.png", true)}),
                     beer : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/heineken.png", true)}),
                     flag: context.get_instance(Flag_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/flag.png", true)}),
+                    fire : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1, specularity: 1}),
                     blue_fire : context.get_instance(Phong_Shader).material(Color.of(44/255,83/255,143/255,1), {ambient: 1, diffusivity: 1,}),
-                    yellow_fire : context.get_instance(Phong_Shader).material(Color.of(1,189/255,46/255,1), {ambient: 1, diffusivity: 1,})
+                    yellow_fire : context.get_instance(Phong_Shader).material(Color.of(1,189/255,46/255,1), {ambient: 1, diffusivity: 1,}),
                     fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/classic.jpg", true)}),
                     wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/high_res_wood_tile.jpg", true)}),
                     table_wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/table_wood.jpg", true)}),
@@ -438,10 +440,23 @@ window.Dart_Scene= window.classes.Dart_Scene =
             // conditional variables
             this.charging = false;
             this.shoot = false;
+            this.collision_computed = false;
             this.angle_up_start = false;
             this.angle_down_start = false;
             this.angle_left_start = false;
             this.angle_right_start = false;
+            this.bulls_eye = false;
+            this.stop_firework = true;
+            this.fire_time = 0;
+
+            //random firework
+            this.random_v = [];
+            this.random_g = [];
+            this.random_x_angle = [];
+            this.random_z_angle = [];
+            this.random_direct = [];
+
+            this.get_random();
 
             // time
             this.charging_start_time = 0;
@@ -569,6 +584,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.angle_down_start = false;
             this.angle_left_start = false;
             this.angle_right_start = false;
+            this.collision_computed = false;
+            this.fire_time = 0;
 
             // transform: dart, board, power bar
             this.dart_pos = [-100,0,0]; // current dart position
@@ -634,6 +651,46 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             this.draw_table(graphics_state, 1,2,3);
             this.draw_ground(graphics_state);
+        }
+
+        draw_firework(graphics_state, t) {
+            let zero_to_one = 0.5 + 0.5*Math.sin(2 * Math.PI/3*t);
+            // let color = Color.of( 1, 1, 1, 1 );
+
+            this.stop_firework = true;
+            for(let i = 0; i < 500; i++){
+                let V = this.random_v[i];
+                let g = this.random_g[i];
+                let x_angle = this.random_x_angle[i];
+                let z_angle = this.random_z_angle[i];
+
+                let p_xy = V * Math.cos(x_angle);
+                let p_xz = V * Math.cos(z_angle);
+                let Vx = p_xy * Math.cos(z_angle);
+                let Vy = p_xy * Math.sin(z_angle);
+                let Vz = -1 * p_xz * Math.sin(x_angle);
+
+
+                // let Vx = V * Math.cos(x_angle) * Math.cos(z_angle);
+                // // if (x_angle < 0) Vx = V * -1* Math.cos(x_angle);
+                // let Vy = V * Math.sin(x_angle) * Math.cos(z_angle);
+                // let Vz = V * Math.cos(x_angle) * Math.sin(z_angle);
+                let max_Y = Vy * Vy / (2 * g);
+
+                let X = this.random_direct[i] * Vx* (t - this.fire_time);
+                let Y = Vy*(t - this.fire_time) - g*(t - this.fire_time)*(t - this.fire_time)/2;
+                let Z = this.random_direct[i] * Vz*(t - this.fire_time);
+                let color = Color.of( Y/max_Y, zero_to_one, 0, 1 );
+                if(Y > -10){
+                    let transform = Mat4.identity();
+                    transform = transform.times(Mat4.translation([X,Y,Z]));
+                    transform = transform.times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
+                    transform = transform.times(Mat4.scale([0.5,0.5,0.5]));
+                    this.shapes.sphere.draw(graphics_state, transform, this.materials.fire.override({color: color, ambient:Y}));
+                    this.stop_firework = false;
+                }
+            }
+
         }
 
         draw_dart(graphics_state, t) {
@@ -841,6 +898,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
         // Determine only based on x-axis
         // position can be vec3
         detect_collision(dart_pos, board_pos, board_rad) {
+            if(this.collision_computed) return false;
+
             let x_offset = Math.abs(dart_pos[0] - board_pos[0]);
 
             if (x_offset <= 2 && this.compute_distance(dart_pos, board_pos) <= board_rad) {
@@ -850,6 +909,26 @@ window.Dart_Scene= window.classes.Dart_Scene =
             return false;
         }
 
+        get_random(){
+            this.random_v = [];
+            this.random_g = [];
+            this.random_x_angle = [];
+            this.random_z_angle = [];
+            this.random_direct = [];
+            for(let i = 0; i < 500; i++){
+                this.random_v.push(Math.ceil(Math.random() * 20) + 10);
+                this.random_g.push(Math.ceil(Math.random() * 20) + 10);
+                this.random_x_angle.push(Math.PI/Math.ceil(Math.random() * 3));
+                this.random_z_angle.push(Math.PI/Math.ceil(Math.random() * 3));
+                if(Math.random()<0.5) this.random_direct.push(1);
+                else this.random_direct.push(-1);
+            }
+            // console.log(this.random_v);
+            // console.log(this.random_x_angle);
+            // console.log(this.random_z_angle);
+            // console.log(this.random_direct);
+        }
+
         compute_score(dart_pos, board_pos, board_rad) {
 
             let z_offset = Math.abs(dart_pos[2] - board_pos[2]);
@@ -857,6 +936,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             if (z_offset <= board_rad * 0.1 && y_offset <= board_rad * 0.1) {
                 console.log("Bulls EYE");
+                this.bulls_eye = true;
+                this.get_random();
                 this.score = 100;
             } else if (z_offset <= board_rad * 0.3 && y_offset <= board_rad * 0.3) {
                 this.score = 70;
@@ -963,6 +1044,19 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 this.set_angle();
             }
 
+            //firework
+            if(this.bulls_eye) {
+                this.fire_time = t;
+                this.bulls_eye = false;
+            }
+            if(this.fire_time != 0){
+                this.draw_firework(graphics_state, t);
+                if(this.stop_firework) {
+                    this.get_random();
+                    this.fire_time = t;
+                }
+            }
+
             //draw five gray fabrics
             this.draw_background(graphics_state);
 
@@ -976,6 +1070,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 console.log("Detected Collision");
                 this.shoot = false;
                 this.compute_score(this.dart_pos, this.board_pos, 50);
+                this.collision_computed = true;
             }
 
             // flag
