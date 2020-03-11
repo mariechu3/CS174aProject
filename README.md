@@ -15,7 +15,7 @@ This scene simulates funhouses mirrors at the carnival, including a plane mirror
 Using the mirror equation: 
 ![Image description](https://www.physicstutorials.org/images/stories/mirrorequations2.png)
 
-![Image](../mirror.png)
+![Image](mirror.png)
 
 #####Advanced Features
 This scene includes advanced features such as reflections. With the plane mirror the magnification of the 
@@ -32,7 +32,7 @@ light source and larger as the object gets closer to the light source in the upw
 Su Yong Won & Changhui Youn
 #####Brief Description
 This scene simulates a Dart game in which a user can aim and shoot at a target. It simulates the effect of wind and gravity on the path of the projectile. There is also a descriptor box that keeps track of the score and additional descriptors for the shot such as wind speed, direction, etc. If the user hits a bulls-eye, fireworks will go off.
-![Image](../dart.png)
+![Image](dart.png)
 
 
 
@@ -45,7 +45,7 @@ This scene simulates a Dart game in which a user can aim and shoot at a target. 
  ####*Main Scene:*
 #####Brief Description
 The Main scene navigates between the two scenes and includes the implementation of simple fireworks in the background.
-![Image](../main.png)
+![Image](main.png)
 #####References
 This code was referenced to implement a fragment and vertex shader in the dart game's flag.
 
