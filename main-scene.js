@@ -760,6 +760,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     silk : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/silk_fabric.jpg", true)}),
                     toystory : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/behind_dart.jpg", true)}),
                     photo_frame : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1}),
+                    funhouse : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/funhouse.jpg", true)}),
+                    carnival_tent : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/carnival_tent.png", true)}),
                 };
 
             this.lights = [new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
@@ -991,6 +993,47 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.shapes.bar.draw(graphics_state, transform, this.materials.white_wood);
         }
 
+        draw_photos(graphics_state) {
+          let x = 500;
+          let y = 200;
+          let z = 10;
+          let rot_angle = Math.PI/2;
+
+          let transform = Mat4.identity();
+
+          // poster
+          transform = Mat4.identity();
+          transform = transform.times(Mat4.translation([x-10,100,-270]));
+          transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+          transform = transform.times(Mat4.scale([70,100,10]));
+          this.shapes.bar.draw(graphics_state, transform, this.materials.funhouse);
+
+          // photo
+          transform = Mat4.identity();
+          transform = transform.times(Mat4.translation([x-10,100,240]));
+          transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+          transform = transform.times(Mat4.scale([50,50,10]));
+          this.shapes.bar.draw(graphics_state, transform, this.materials.marvel);
+
+          transform = Mat4.identity();
+          transform = transform.times(Mat4.translation([x-10 + 5, 100,240]));
+          transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+          transform = transform.times(Mat4.scale([55,55,10]));
+          this.shapes.bar.draw(graphics_state, transform, this.materials.photo_frame);
+
+          transform = Mat4.identity();
+          transform = transform.times(Mat4.translation([x-10, 100,370]));
+          transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+          transform = transform.times(Mat4.scale([50,50,10]));
+          this.shapes.bar.draw(graphics_state, transform, this.materials.toystory);
+
+          transform = Mat4.identity();
+          transform = transform.times(Mat4.translation([x-10 + 5, 100,370]));
+          transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
+          transform = transform.times(Mat4.scale([55,55,10]));
+          this.shapes.bar.draw(graphics_state, transform, this.materials.photo_frame);
+        }
+
         draw_left_wall(graphics_state) {
             let x = 500;
             let y = 200;
@@ -1059,30 +1102,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
 
 
-            // draw photo
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([x-10,100,240]));
-            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([50,50,10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.marvel);
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([x-10 + 5, 100,240]));
-            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([55,55,10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.photo_frame);
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([x-10, 100,370]));
-            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([50,50,10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.toystory);
-
-            transform = Mat4.identity();
-            transform = transform.times(Mat4.translation([x-10 + 5, 100,370]));
-            transform = transform.times(Mat4.rotation(rot_angle, Vec.of(0,1,0)));
-            transform = transform.times(Mat4.scale([55,55,10]));
-            this.shapes.bar.draw(graphics_state, transform, this.materials.photo_frame);
+            // draw photos and posters
+            this.draw_photos(graphics_state)
         }
 
         draw_back_wall(graphics_state) {
@@ -1502,13 +1523,13 @@ window.Dart_Scene= window.classes.Dart_Scene =
             let flag_loc;
             let flag_rot;
             let flag_x = 300;
-            let flag_y = -100;
+            let flag_y = -50;
             let flag_z = -200;
             if (this.accel_z > 0) {
                 flag_loc = [flag_x, flag_y, 0 + flag_z];
                 flag_rot = 0;
             } else {
-                flag_loc = [flag_x, flag_y,-40 + flag_z];
+                flag_loc = [flag_x, flag_y,-80 + flag_z];
                 flag_rot = Math.PI;
             }
 
@@ -1517,14 +1538,19 @@ window.Dart_Scene= window.classes.Dart_Scene =
                 .times(Mat4.rotation(flag_rot, Vec.of(0,1,0)))
                 .times(Mat4.rotation(Math.PI, Vec.of(1,0,0))) // upside down
                 .times(Mat4.rotation(Math.PI / 2, Vec.of(0,1,0))) // same direction with the board
-                .times(Mat4.scale([20,20,20]));
+                .times(Mat4.scale([40,40,40]));
 
             let stick_transform = Mat4.identity()
-                .times(Mat4.translation([flag_x,flag_y-10,-20 + flag_z]))
+                .times(Mat4.translation([flag_x,flag_y-10,-40 + flag_z]))
                 .times(Mat4.scale([1,20,0.1]));
+
+            let tent_transform = Mat4.identity()
+              .times(Mat4.translation([flag_x,flag_y-54,-20 + flag_z-20]))
+              .times(Mat4.scale([0,40,40]));
 
             this.shapes.bar.draw(graphics_state, stick_transform, this.materials.bar);
             this.shapes.flag.draw(graphics_state, flag_transform, this.materials.flag.override({ wind: this.accel_z } ) );
+            this.shapes.bar.draw(graphics_state, tent_transform, this.materials.carnival_tent);
         }
 
         update_stat() {
