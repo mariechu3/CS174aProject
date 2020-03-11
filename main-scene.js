@@ -828,20 +828,19 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
         make_control_panel() {
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-            this.key_triggered_button("Charge", ["Enter"], this.start_charging, '#'+Math.random().toString(9).slice(-6), this.start_shoot);
+            this.key_triggered_button("Charge", ["Enter"], this.start_charging,"#173885", this.start_shoot);
+            this.key_triggered_button("Angle Up", ["i"], this.angle_up, "#F2337B", this.angle_up_release);
+            this.key_triggered_button("Angle Down", ["k"], this.angle_down,"#F6D003", this.angle_down_release);
+            this.key_triggered_button("Angle Left", ["j"], this.angle_left,"#077DDF", this.angle_left_release);
+            this.key_triggered_button("Angle Right", ["l"], this.angle_right,"#F60E26", this.angle_right_release);
             this.new_line();
-            this.key_triggered_button("Angle Up", ["i"], this.angle_up, '#'+Math.random().toString(9).slice(-6), this.angle_up_release);
-            this.key_triggered_button("Angle Down", ["k"], this.angle_down, '#'+Math.random().toString(9).slice(-6), this.angle_down_release);
-            this.key_triggered_button("Angle Left", ["j"], this.angle_left, '#'+Math.random().toString(9).slice(-6), this.angle_left_release);
-            this.key_triggered_button("Angle Right", ["l"], this.angle_right, '#'+Math.random().toString(9).slice(-6), this.angle_right_release);
-            this.new_line();
-            this.key_triggered_button("Restart", ["q"], this.restart, '#'+Math.random().toString(9).slice(-6));
-            this.key_triggered_button("Front View", ["1"], ()=>this.attached=()=> this.front_view, '#'+Math.random().toString(9).slice(-6));
-            this.key_triggered_button("Side View", ["2"],  ()=>this.attached=()=> this.initial_camera_location, '#'+Math.random().toString(9).slice(-6));
-            this.key_triggered_button("Dart View", ["/"],  ()=>this.attached=()=> this.dart_view, '#'+Math.random().toString(9).slice(-6));
-            this.key_triggered_button("Change Wind Direction", ["3"],  ()=>this.accel_z=this.accel_z*-1, '#'+Math.random().toString(9).slice(-6));
-            this.key_triggered_button("More Wind", ["9"],  ()=>this.accel_z+= 1, '#'+Math.random().toString(9).slice(-6));
-            this.key_triggered_button("Less Wind", ["0"],  ()=>this.accel_z-= 1, '#'+Math.random().toString(9).slice(-6));
+            this.key_triggered_button("Restart", ["q"], this.restart,"#872E8C");
+            this.key_triggered_button("Front View", ["1"], ()=>this.attached=()=> this.front_view, "#D72630");
+            this.key_triggered_button("Side View", ["2"],  ()=>this.attached=()=> this.initial_camera_location, "#D7D52A");
+            this.key_triggered_button("Dart View", ["/"],  ()=>this.attached=()=> this.dart_view, "#F28A17");
+            this.key_triggered_button("Change Wind Direction", ["3"],  ()=>this.accel_z=this.accel_z*-1,  "#07A499");
+            this.key_triggered_button("More Wind", ["9"],  ()=>this.accel_z+= 1,  "#FF7EA0");
+            this.key_triggered_button("Less Wind", ["0"],  ()=>this.accel_z-= 1, "#F60E26");
         }
 
         start_charging() {
