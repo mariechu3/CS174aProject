@@ -4,6 +4,10 @@
 <html lang="En">
 <head>
     <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="icon" href="assets/fav.ico">
     <script> window.tiny_graphics = {};             // Store all our JavaScipt code inside of classes here.
     window.classes = {}
@@ -28,37 +32,61 @@
             top: 10px;
             background-color: transparent;
         }
+        #main-canvas {
+           margin: 0 auto;
+        }
     </style>
 </head>
 <body style="background: DarkGray">       <!-- Begin typing your web page here. //-->
 
 <!-- The following code embeds a WebGL canvas panel widget with certain scenes and their controls. //-->
 
-<div id="main-canvas" class="canvas-widget" style="background-color: transparent">
-    <div id="dart_data" class="container" style="display: none; background-color: transparent">
-        <div class="overlay" style="background-color: transparent">
-            <h1><div style="background-color: transparent">Score: <span id="score"></span></div></h1>
-            <h1><div style="background-color: transparent">Max Score: <span id="max_score"></span></div></h1>
-            <h1><div style="background-color: transparent">Power: <span id="power"></span></div></h1>
-            <h1><div style="background-color: transparent">Wind: <span id="wind"></span></div></h1>
-            <h1><div style="background-color: transparent">Up-Down Angle: <span id="up_down_angle"></span></div></h1>
-            <h1><div style="background-color: transparent">Left-Right Angle: <span id="left_right_angle"></span></div></h1>
+
+
+<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div id="main-canvas" class="canvas-widget" style="background-color: transparent">
+                <div id="dart_data" class="container" style="display: none; background-color: transparent">
+                    <div class="overlay" style="background-color: transparent">
+                        <h1><div style="background-color: transparent">Score: <span id="score"></span></div></h1>
+                        <h1><div style="background-color: transparent">Max Score: <span id="max_score"></span></div></h1>
+                        <h1><div style="background-color: transparent">Power: <span id="power"></span></div></h1>
+                        <h1><div style="background-color: transparent">Wind: <span id="wind"></span></div></h1>
+                        <h1><div style="background-color: transparent">Up-Down Angle: <span id="up_down_angle"></span></div></h1>
+                        <h1><div style="background-color: transparent">Left-Right Angle: <span id="left_right_angle"></span></div></h1>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev" onclick="initialize('Mirror_Scene')">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next" onclick="initialize('Dart_Scene')">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
 </div>
 
-<script type=>     // ********************* THE ENTRY POINT OF YOUR WHOLE PROGRAM STARTS HERE *********************
+<script>     // ********************* THE ENTRY POINT OF YOUR WHOLE PROGRAM STARTS HERE *********************
 // Use this code to embed a widget into any web page.  The widget inclues a 3D WebGL area
 // (an HTML canvas) and various panels of controls.
-const scenes = ["Main_Scene",    // First, list the names of scenes we will add to our canvas.  These will register
-];
+const initialize = (Scene) => {
+    const scenes = [Scene,    // First, list the names of scenes we will add to our canvas.  These will register
+    ];
 // themselves with this widget's Canvas_Manager so that their code can be called upon
 // every time a draw / keyboard / mouse event happens on the web page.
-new Canvas_Widget("main-canvas", scenes, true);
-if(scenes[0]=="Dart_Scene") document.getElementById("dart_data").style.display = "block";
-else document.getElementById("dart_data").style.display = "none";
+    new Canvas_Widget("main-canvas", scenes, true);
+    if(scenes[0]=="Dart_Scene") document.getElementById("dart_data").style.display = "block";
+    else document.getElementById("dart_data").style.display = "none";
 // Use the Canvas_Widget class to display the WebGL demo.  Pass in
 // the name of the HTML element we are to replace with the widget.
+};
+
+initialize('Main_Scene');
+
 </script>
 <!-- The following code embeds a code navigator widget with links to classes. //-->
 <div id="main-code" class="code-widget"></div>
