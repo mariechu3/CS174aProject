@@ -113,8 +113,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         ambient: 1,
         texture: context.get_instance("assets/ground.jpg", true)
       }),
-      shadow: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, 0.5), {
-        ambient: .15,
+      shadow: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, .6), {
+        ambient: 1,
         diffusivity: 0,
         specularity: 0,
       })
