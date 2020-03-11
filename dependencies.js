@@ -426,7 +426,7 @@ window.Torus_2 = window.classes.Torus_2 =
     { constructor( rows, columns )
     { super( "positions", "normals", "texture_coords" );
         const circle_points = Array( rows ).fill( Vec.of( .75,0,0 ) )
-            .map( (p,i,a) => Mat4.translation([ -20,0,0 ])
+            .map( (p,i,a) => Mat4.translation([ -5,0,0 ])
                 .times( Mat4.rotation( i/(a.length-1) * 2*Math.PI, Vec.of( 0,-1,0 ) ) )
                 .times( p.to4(1) ).to3() );
 
@@ -488,6 +488,62 @@ window.SpikeBall = window.classes.SpikeBall =
       Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.scale([.65,.65,.65]));
     }
     }
+window.Hat = window.classes.Hat =
+    class Hat extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( rows, columns, texture_range )
+    { super( "positions", "normals", "texture_coords" );
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([0,3,0]).times(Mat4.scale([0.80,0.80,0.80])).times(Mat4.rotation(-(Math.PI) / 2, Vec.of(1, 0, 0))));
+    }}
+window.Face = window.classes.Face =
+    class Face extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( num)
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.5,0]).times(Mat4.scale([1,1,1])));
+    }}
+window.Hair = window.classes.Hair =
+    class Hair extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor( num)
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.5,.2]).times(Mat4.scale([1,1,1])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.65,.09]).times(Mat4.scale([1,1,1])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.65,.2]).times(Mat4.scale([1,1,1])));
+        Closed_Cone.insert_transformed_copy_into(this,[20,20,[1,1]], Mat4.translation(([-.8,2.3,0])).times(Mat4.scale([0.4,0.4,0.4])).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,1,0])));
+        Closed_Cone.insert_transformed_copy_into(this,[20,20,[1,1]], Mat4.translation(([.8,2.3,0])).times(Mat4.scale([0.4,0.4,0.4])).times(Mat4.rotation(Math.PI/4, [0,0,1])).times(Mat4.rotation(-Math.PI/2, [0,1,0])));
+    }}
+
+window.Body = window.classes.Body =
+    class Body extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Cylindrical_Tube_2.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,0,0]).times(Mat4.scale([.7,1.5,.7])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([.8,2.3,0]).times(Mat4.rotation(Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,1,0])).times(Mat4.scale([.05,.05,.05])));
+        Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-.8,2.3,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(-Math.PI/2, [0,1,0])).times(Mat4.scale([.05,.05,.05])));
+    }}
+window.Legs = window.classes.Legs =
+    class Legs extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.8,-.2,0]).times(Mat4.rotation(-Math.PI/3, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([1.12,-.75,0]).times(Mat4.scale([.148,.148,.148])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([-1.48,1.18,0]).times(Mat4.scale([.148,.148,.148])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.3,-2,0]).times(Mat4.scale([.148,.148,.148])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([.3,-2,0]).times(Mat4.scale([.148,.148,.148])));
+    }}
+window.Arm = window.classes.Arm =
+    class Arm extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.8,-.2,0]).times(Mat4.rotation(-Math.PI/3, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+
+    }}
+
+
 
 
 window.Balloon = window.classes.Balloon =
@@ -495,9 +551,9 @@ window.Balloon = window.classes.Balloon =
     { constructor( rows, columns, texture_range )
     { super( "positions", "normals", "texture_coords" );
       //Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range],Mat4.scale([.025,4,.025]).times(Mat4.rotation((Math.PI/2), [1,0,0])))
-      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,2.81,0]).times(Mat4.scale([.69,.69,.69])).times(Mat4.rotation((Math.PI/2), [1,0,0])))
-      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([0,2.25,0]).times(Mat4.scale([.15,.15,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([0,4.05,0]).times(Mat4.scale([1.05,1.10,1.05])));
+      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1.4,6.81,0]).times(Mat4.scale([.69,.69,.69])).times(Mat4.rotation((Math.PI/2), [1,0,0])))
+      Cylindrical_Tube_3.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1.4,6.25,0]).times(Mat4.scale([.15,.15,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+      Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-1.4,8.05,0]).times(Mat4.scale([1.05,1.10,1.05])));
     }
     }
 window.Subdivision_Sphere_small = window.classes.Subdivision_Sphere_small =
@@ -519,7 +575,7 @@ window.String = window.classes.String =
     class Balloon extends Shape
     { constructor( rows, columns, texture_range )
     { super( "positions", "normals", "texture_coords" );
-      Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range],Mat4.scale([.025,4.2,.025]).times(Mat4.rotation((Math.PI/2), [1,0,0])));
+      Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range],Mat4.translation([-1.4,3.6,0]).times(Mat4.scale([.025,5.1,.025])).times(Mat4.rotation((Math.PI/2), [1,0,0])));
      // Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([0,-1.8,-1.4]).times(Mat4.rotation(Math.PI/2, [1,0,0])).times(Mat4.scale([.07,.07,.05])));
     }
     }

@@ -48,7 +48,11 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       balloon: new Balloon(20,20,[1,1]),
       string: new String(20,20,[1,1]),
       circle: new Circle(20,20),
-      cone: new Closed_Cone(20,20,[1,1]),
+      cone: new Hat(20,20,[1,1]),
+      head: new Face(4),
+      body: new Body(20,20,[1,1]),
+      leg: new Legs(20,20,[1,1]),
+      hair: new Hair(4)
     };
     shapes.box_2.texture_coords = shapes.box_2.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 6));
     shapes.box_1.texture_coords = shapes.box_1.texture_coords.map(v => Vec.of(v[0] * 4, v[1] * 6));
@@ -68,6 +72,22 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           .material(Color.of(0, 0, 0, 1), {
             ambient: 0.8,
             texture:context.get_instance("assets/funhouse.jpg",true)
+          }),
+      face: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture:context.get_instance("assets/face.jpg",true)
+          }),
+      hair: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: .5,
+          }),
+      legs: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(.941, .757, .445, 1), {
+            ambient: .5,
           }),
       wall2: context
           .get_instance(Phong_Shader)
@@ -119,7 +139,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       if (this.avatar_pos[1][3] > 0)
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, -0.5, 0]));
     } else if (dir === 4) {
-      if (this.avatar_pos[2][3] > 1.0)
+      if (this.avatar_pos[2][3] > 1.5)
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, -0.5]));
     } else if (dir === 5)
       this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, 0.5]));
@@ -295,6 +315,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           [pos[1][0], pos[1][1], pos[1][2], 0],
           [pos[2][0],pos[2][1],pos[2][2]*scale*scale_2,pos[2][3]], pos[3]], this.materials.shadow.override({ambient: ambient_scale}));
   }
+  draw_avatar_help(graphics_state,pos) {
+    //this.shapes.cone.draw(graphics_state, pos, this.materials.floor)
+    this.shapes.head.draw(graphics_state, pos, this.materials.face)
+    this.shapes.body.draw(graphics_state, pos, this.materials.avatar)
+    this.shapes.leg.draw(graphics_state, pos, this.materials.legs)
+    this.shapes.hair.draw(graphics_state, pos, this.materials.hair)
+  }
   display(graphics_state) {
     graphics_state.lights = this.lights; // Use the lights stored in this.lights.
     const t = graphics_state.animation_time / 1000,
@@ -306,16 +333,18 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     if(this.avatar_pos[1][3]>0)
       this.avatar_pos[1][3] -= dt;
 
-    this.shapes.spike.draw(
+    /*this.shapes.spike.draw(
         graphics_state,
         this.avatar_pos,
         this.materials.avatar
-    );
-   //this.shapes.cone.draw(graphics_state,this.avatar_pos,this.materials.avatar)
+    );*/
+    this.draw_avatar_help(graphics_state, this.avatar_pos);
+
 
     //this.shapes.avatar.draw(this.mycontext, graphics_state, this.avatar_pos,this.materials.avatar);
     this.draw_shadow_help(graphics_state, this.avatar_pos);
     this.draw_balloon_help(graphics_state,this.avatar_pos,t);
+
 
 
     //draw reflected cases
@@ -329,16 +358,17 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       copy[3]
     ];
     if (this.avatar_pos[0][3] >= -4 && this.avatar_pos[0][3] <= 4) {
-      this.shapes.spike.draw(
+      /*this.shapes.spike.draw(
           graphics_state,
           reflected_mat,
           this.materials.avatar
-      );
+      );*/
+      this.draw_avatar_help(graphics_state,reflected_mat);
       this.draw_balloon_help(graphics_state,reflected_mat,t);
       this.draw_shadow_help(graphics_state,reflected_mat);
     }
     //convex case will always be upright
-    else if (this.avatar_pos[0][3] < -4) {
+    else if (this.avatar_pos[0][3] < -7) {
       scale =
           (-1 * this.mirror_eq(-3, this.avatar_pos[2][3])) /
           this.avatar_pos[2][3];
@@ -349,20 +379,23 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
         copy[3]
       ];
-      this.shapes.spike.draw(
+      /*this.shapes.spike.draw(
           graphics_state,
           reflected_mat,
-          this.materials.avatar
-      );
+          this.materials.avatar*
+
+     );*/
+      this.draw_avatar_help(graphics_state,reflected_mat);
       this.draw_balloon_help(graphics_state,reflected_mat,t);
       this.draw_shadow_help(graphics_state,reflected_mat);
     }
     //concave cases
-    else if (this.avatar_pos[0][3] > 4) {
+    else if (this.avatar_pos[0][3] > 7) {
       //if needs to be inverted
-      if (this.mirror_eq(3, this.avatar_pos[2][3]) > 0) {
+      if (this.mirror_eq(4.0, this.avatar_pos[2][3]) > 0) {
         scale =
-            this.mirror_eq(2, this.avatar_pos[2][3]) / this.avatar_pos[2][3];
+            this.mirror_eq(4.0, this.avatar_pos[2][3]) / this.avatar_pos[2][3];
+        if(scale > 3) scale = 3;
         console.log(scale);
         copy = this.avatar_pos.times(Mat4.scale([scale, scale, scale]));
         //copy = copy.times(Mat4.rotation(Math.PI,[0,1,0])).times(Mat4.rotation(Math.PI,[0,1,0]))
@@ -372,10 +405,15 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
           copy[3]
         ];
+        if(this.avatar_pos[2][3] < 3) {
+          reflected_mat[2][3] = -10;
+          console.log(reflected_mat[2][3]);
+        }
       } else {
         scale =
-            (-1 * this.mirror_eq(3, this.avatar_pos[2][3])) /
+            (-1 * this.mirror_eq(4.0, this.avatar_pos[2][3])) /
             this.avatar_pos[2][3];
+        if(scale > 3) scale = 3;
         copy = this.avatar_pos.times(Mat4.scale([scale, scale, scale]));
         reflected_mat = [
           copy[0],
@@ -385,12 +423,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         ];
         this.draw_shadow_help(graphics_state,reflected_mat);
       }
-      this.shapes.spike.draw(
+      /*this.shapes.spike.draw(
           graphics_state,
           reflected_mat,
           this.materials.avatar
-      );
+      );*/
       this.draw_balloon_help(graphics_state,reflected_mat,t);
+      this.draw_avatar_help(graphics_state,reflected_mat);
     }
 
     //camera coordinates
