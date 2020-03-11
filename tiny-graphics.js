@@ -624,8 +624,8 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
         ".canvas-widget canvas { width: 1080px; height: 600px; margin-bottom:-3px }",
         ".canvas-widget div { background: white }",
         ".canvas-widget table { border-collapse: collapse; display:block; overflow-x: auto; }",
-        ".canvas-widget table.control-box { width: 1080px; border:0; margin:0; max-height:500px; transition:.5s; overflow-y:scroll; background:lightblue }", //set at 380
-        ".canvas-widget table.control-box:hover { max-height:500px }",
+        ".canvas-widget table.control-box { width: 1080px; border:0; margin:0; max-height:700px; transition:.5s; overflow-y:scroll; background:lightblue }", //set at 380
+        ".canvas-widget table.control-box:hover { max-height:700px }",
         ".canvas-widget table.control-box td { overflow:hidden; border:0; background:DimGray; border-radius:10px }",
         ".canvas-widget table.control-box td .control-div { background: #ADDAE6; height:500px; padding: 5px 5px 5px 30px; box-shadow: 0px 0px 0px 0px inset }", //set at 250
         ".canvas-widget table.control-box td * { background:transparent }",
@@ -639,7 +639,7 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
         ".dropdown-content a { color: black; padding: 4px 4px; display: block }",
         ".dropdown a:hover { background: #f1f1f1 }",
         ".canvas-widget button { background: #4C9F50; color: white; padding: 10px 10px; border-radius:80%; \
-                                  box-shadow: 4px 6px 16px 0px rgba(0,0,0,0.3); border: 2px solid #C0C0C0; height: 80px; width: 110px; margin: 10px 30px; font-size: 20px; font-family: Brush Script MT, cursive; transition: background .3s, transform .3s }",
+                                  box-shadow: 4px 6px 16px 0px rgba(0,0,0,0.3); border: 2px solid #C0C0C0; height: 100px; width: 120px; margin: 10px 10px; font-size: 20px; font-family: Brush Script MT, cursive; transition: background .3s, transform .3s }",
         ".canvas-widget button:hover, button:focus { transform: scale(1.3); color:gold }",
         ".link { text-decoration:underline; cursor: pointer }",
         ".show { transform: scaleY(1); height:200px; overflow:auto }",

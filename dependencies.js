@@ -1038,12 +1038,12 @@ class Movement_Controls extends Scene_Component    // Movement_Controls is a Sce
   make_control_panel()                                                        // This function of a scene sets up its keyboard shortcuts.
     { const globals = this.globals;
       this.control_panel.innerHTML += "Click and drag the scene to <br> spin your viewpoint around it.<br>";
-      this.key_triggered_button( "Up",     [ "1" ], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0 );  this.new_line();
-      this.key_triggered_button( "Forward",[ "2" ], () => this.thrust[2] =  1, undefined, () => this.thrust[2] = 0 );  this.new_line();
+      this.key_triggered_button( "Up",     [ "j" ], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0 );  this.new_line();
+      this.key_triggered_button( "Forward",[ "i" ], () => this.thrust[2] =  1, undefined, () => this.thrust[2] = 0 );  this.new_line();
      // this.key_triggered_button( "Left",   [ "3" ], () => this.thrust[0] =  1, undefined, () => this.thrust[0] = 0 );  this.new_line();
-      this.key_triggered_button( "Back",   [ "3" ], () => this.thrust[2] = -1, undefined, () => this.thrust[2] = 0 );  this.new_line();
+      this.key_triggered_button( "Back",   [ "k" ], () => this.thrust[2] = -1, undefined, () => this.thrust[2] = 0 );  this.new_line();
      // this.key_triggered_button( "Right",  [ "5" ], () => this.thrust[0] = -1, undefined, () => this.thrust[0] = 0 );  this.new_line();
-      this.key_triggered_button( "Down",   [ "4" ], () => this.thrust[1] =  1, undefined, () => this.thrust[1] = 0 );
+      this.key_triggered_button( "Down",   [ "l" ], () => this.thrust[1] =  1, undefined, () => this.thrust[1] = 0 );
 
       const speed_controls = this.control_panel.appendChild( document.createElement( "span" ) );
       speed_controls.style.margin = "30px";
