@@ -1,3 +1,4 @@
+
 <!-- Graphics Example Code.  index.html - The web page document containing the canvas (drawing surface), that launches your javascript files. //-->
 <!DOCTYPE html>
 <html lang="En">
@@ -11,26 +12,58 @@
     <script src="tiny-graphics.js"></script>
     <script src="dependencies.js"></script>
     <script src="main-scene.js"></script>
+    <style>
+        .container {
+            position: relative;
+        }
+        h1 {
+            margin: 0;
+            color: skyblue;
+            text-shadow: 0 1px 0 black;
+            background-color: transparent;
+        }
+        .overlay {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            background-color: transparent;
+        }
+    </style>
 </head>
 <body style="background: DarkGray">       <!-- Begin typing your web page here. //-->
 
 <!-- The following code embeds a WebGL canvas panel widget with certain scenes and their controls. //-->
-<div id="main-canvas" class="canvas-widget"></div>
+
+<div id="main-canvas" class="canvas-widget" style="background-color: transparent">
+    <div id="dart_data" class="container" style="display: none; background-color: transparent">
+        <div class="overlay" style="background-color: transparent">
+            <h1><div style="background-color: transparent">Score: <span id="score"></span></div></h1>
+            <h1><div style="background-color: transparent">Max Score: <span id="max_score"></span></div></h1>
+            <h1><div style="background-color: transparent">Power: <span id="power"></span></div></h1>
+            <h1><div style="background-color: transparent">Wind: <span id="wind"></span></div></h1>
+            <h1><div style="background-color: transparent">Up-Down Angle: <span id="up_down_angle"></span></div></h1>
+            <h1><div style="background-color: transparent">Left-Right Angle: <span id="left_right_angle"></span></div></h1>
+        </div>
+    </div>
+</div>
+
 <script type=>     // ********************* THE ENTRY POINT OF YOUR WHOLE PROGRAM STARTS HERE *********************
 // Use this code to embed a widget into any web page.  The widget inclues a 3D WebGL area
 // (an HTML canvas) and various panels of controls.
 const scenes = ["Main_Scene",    // First, list the names of scenes we will add to our canvas.  These will register
-    ];
+];
 // themselves with this widget's Canvas_Manager so that their code can be called upon
 // every time a draw / keyboard / mouse event happens on the web page.
 new Canvas_Widget("main-canvas", scenes, true);
+if(scenes[0]=="Dart_Scene") document.getElementById("dart_data").style.display = "block";
+else document.getElementById("dart_data").style.display = "none";
 // Use the Canvas_Widget class to display the WebGL demo.  Pass in
 // the name of the HTML element we are to replace with the widget.
 </script>
 <!-- The following code embeds a code navigator widget with links to classes. //-->
 <div id="main-code" class="code-widget"></div>
 <script>
-   // new Code_Widget("main-code", "Mirror_Scene");
+    // new Code_Widget("main-code", "Mirror_Scene");
 </script>
 <audio controls autoplay loop>
     <source src="assets/music.mp3" type="audio/mpeg">

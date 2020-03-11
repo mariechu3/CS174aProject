@@ -175,6 +175,43 @@ window.Square_2 = window.classes.Square_2 =
     }
 
 
+window.Flag = window.classes.Flag =
+    class Flag extends Shape              // A square, demonstrating two triangles that share vertices.  On any planar surface, the interior
+                                            // edges don't make any important seams.  In these cases there's no reason not to re-use data of
+    {                                       // the common vertices between triangles.  This makes all the vertex arrays (position, normals,
+      constructor()                         // etc) smaller and more cache friendly.
+      { super( "positions", "normals", "texture_coords" );                                   // Name the values we'll define per each vertex.
+        this.positions     .push( ...Vec.cast( [-1,-1,0],[-1,1,0],[0,-1,0],[0,1,0],[1,-1,0],[1,1,0], [2,-1,0],[2,1,0]) );   // Specify the 4 square corner locations.
+        this.normals       .push( ...Vec.cast( [0,0,1], [0,0,1], [0,0,1], [0,0,1], [0,0,1], [0,0,1] ) );   // Match those up with normal vectors.
+        this.texture_coords.push( ...Vec.cast( [-1,-1],[-1,1], [0,-1],[0,1], [1,-1],[1,1], [2,-1], [2,1] ) );   // Draw a square in texture coordinates too.
+        this.indices       .push( 0,1,2,  1,3,2,  2,4,3,  3,4,5, 5,6,4,  5,6,7);                   // Two triangles this time, indexing into four distinct vertices.
+      }
+    };
+
+window.Flag2 = window.classes.Flag2 =
+    class Flag2 extends Shape              // A square, demonstrating two triangles that share vertices.  On any planar surface, the interior
+      // edges don't make any important seams.  In these cases there's no reason not to re-use data of
+    {                                       // the common vertices between triangles.  This makes all the vertex arrays (position, normals,
+      constructor(horizontal_v)                         // etc) smaller and more cache friendly.
+      { super( "positions", "normals", "texture_coords" );                                   // Name the values we'll define per each vertex.
+        for (let i=0; i < horizontal_v; i++) {
+          let x = -1 + 2 * i / (horizontal_v - 1);
+          let tx = i / (horizontal_v - 1);
+          this.positions.push(Vec.of([x, -1, 0]));
+          this.positions.push(Vec.of([x, 1, 0]));
+          this.normals.push(Vec.of([0,0,1]));
+          this.normals.push(Vec.of([0,0,1]));
+          this.texture_coords.push(Vec.of(tx, 0));
+          this.texture_coords.push(Vec.of(tx, 1));
+        }
+        for (let i = 0; i < horizontal_v - 1; i++) {
+          this.indices.push(
+            i*2, i*2+1, i*2+2,  i*2+2, i*2+3, i*2+1
+          );
+        }
+      }
+    };
+
 window.Tetrahedron = window.classes.Tetrahedron =
 class Tetrahedron extends Shape                       // The Tetrahedron shape demonstrates flat vs smooth shading (a boolean argument 
 { constructor( using_flat_shading )                   // selects which one).  It is also our first 3D, non-planar shape.
