@@ -138,7 +138,15 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           .get_instance(Phong_Shader)
           .material(Color.of(0, 0, 0, 1), {//(Color.of(0.8, 0.9, 1, 1)
             ambient: .6,
-            texture:context.get_instance("assets/white_wood.jpg",true)
+            texture:context.get_instance("assets/wall.jpg",true)
+          }),
+      popcorn: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {//(Color.of(0.8, 0.9, 1, 1)
+            ambient: 1,
+            diffusivity: 0,
+            specularity: 0,
+            texture:context.get_instance("assets/popcorn.png",true)
           }),
       balloon: context
           .get_instance(Phong_Shader)
@@ -313,6 +321,20 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.shapes.box.draw(
         graphics_state,
         identity
+            .times(Mat4.translation([-12, 0, 10]))
+            .times(Mat4.scale([1.25, 1, .01])),
+        this.materials.popcorn
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-12, 0, -10]))
+            .times(Mat4.scale([.75, .5, .01])),
+        this.materials.popcorn
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
             .times(Mat4.translation([6, 5, 0]))
             .times(Mat4.scale([1.5, 1.25, .11])),
         this.materials.pictures5
@@ -398,7 +420,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([30,.5,.01])),
         this.materials.funhouse_wall
     )
-    this.shapes.box_5.draw( //outside boxwall
+    this.shapes.box.draw( //outside boxwall
         graphics_state,
         identity
             .times(Mat4.translation([0,-5,0]))
