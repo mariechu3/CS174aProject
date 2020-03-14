@@ -543,7 +543,7 @@ window.Hair = window.classes.Hair =
     { super( "positions", "normals", "texture_coords" );
         Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.5,.2]).times(Mat4.scale([1,1,1])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.65,.09]).times(Mat4.scale([1,1,1])));
-        Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.65,.2]).times(Mat4.scale([1,1,1])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [num], Mat4.translation([0,1.65,.2]).times(Mat4.scale([1,1.1,1])));
         Closed_Cone.insert_transformed_copy_into(this,[20,20,[1,1]], Mat4.translation(([-.8,2.3,0])).times(Mat4.scale([0.4,0.4,0.4])).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,1,0])));
         Closed_Cone.insert_transformed_copy_into(this,[20,20,[1,1]], Mat4.translation(([.8,2.3,0])).times(Mat4.scale([0.4,0.4,0.4])).times(Mat4.rotation(Math.PI/4, [0,0,1])).times(Mat4.rotation(-Math.PI/2, [0,1,0])));
     }}
@@ -562,10 +562,10 @@ window.Legs = window.classes.Legs =
     { super( "positions", "normals", "texture_coords" );
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        //Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.8,-.2,0]).times(Mat4.rotation(-Math.PI/3, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([1.12,-.75,0]).times(Mat4.scale([.148,.148,.148])));
-        Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([-1.48,1.18,0]).times(Mat4.scale([.148,.148,.148])));
+
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.3,-2,0]).times(Mat4.scale([.148,.148,.148])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([.3,-2,0]).times(Mat4.scale([.148,.148,.148])));
     }}
@@ -573,11 +573,8 @@ window.Arm = window.classes.Arm =
     class Arm extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor(rows,columns,texture_range)
     { super( "positions", "normals", "texture_coords" );
-        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([-1.48,1.18,0]).times(Mat4.scale([.148,.148,.148])));
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.8,-.2,0]).times(Mat4.rotation(-Math.PI/3, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-
     }}
 
 

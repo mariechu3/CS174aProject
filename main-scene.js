@@ -19,7 +19,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     );
 
     this.initial_avatar_location = Mat4.identity().times(
-        Mat4.translation([0, 0, 5])
+        Mat4.translation([0, 0, 10])
     );
     this.avatar_pos = this.initial_avatar_location;
 
@@ -36,15 +36,15 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       torus: new Torus(15, 15),
       torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
       sphere: new Subdivision_Sphere(4),
-      box_3: new Cube_2(),
+      box_3: new Cube(),
       box_4: new Cube(),
       box: new Cube(),
       box_1: new Cube(),
       box_2: new Cube(),
+      box_5: new Cube(),
       spike: new SpikeBall(15, 15, [2, 2]),
       square: new Square(),
       frame: new Cube_Outline(),
-      avatar: new Shape_From_File("assets/cartoonboy.obj"),
       balloon: new Balloon(20,20,[1,1]),
       string: new String(20,20,[1,1]),
       circle: new Circle(20,20),
@@ -52,11 +52,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       head: new Face(4),
       body: new Body(20,20,[1,1]),
       leg: new Legs(20,20,[1,1]),
-      hair: new Hair(4)
+      arm: new Arm(20,20,[1,1]),
+      hair: new Hair(4),
     };
+    shapes.box_3.texture_coords = shapes.box_3.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 2));
     shapes.box_2.texture_coords = shapes.box_2.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 6));
     shapes.box_1.texture_coords = shapes.box_1.texture_coords.map(v => Vec.of(v[0] * 4, v[1] * 6));
     shapes.box_4.texture_coords = shapes.box_4.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 4));
+    shapes.box_5.texture_coords = shapes.box_5.texture_coords.map(v => Vec.of(v[0] * 20, v[1] * 20));
     this.submit_shapes(context, shapes);
 
     // Make some Material objects available to you:
@@ -79,6 +82,48 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             ambient: 1,
             texture:context.get_instance("assets/face.jpg",true)
           }),
+      pictures: context
+          .get_instance(Phong_Shader)
+              .material(Color.of(0, 0, 0, 1), {
+                ambient: 1,
+              }),
+      pictures1: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture: context.get_instance("assets/ferris_wheel.jpg",true)
+          }),
+      pictures2: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture: context.get_instance("assets/funhouse.jpg",true)
+          }),
+      pictures3: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: .6,
+            texture: context.get_instance("assets/elephant.jpg",true)
+          }),
+      pictures4: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: .6,
+            texture: context.get_instance("assets/clown.png",true)
+          }),
+      pictures5: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: 1,
+            texture: context.get_instance("assets/merry.jpg",true)
+          }),
+
+      cart: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0, 0, 0, 1), {
+            ambient: .6,
+            texture: context.get_instance("assets/cart.png",true)
+          }),
       hair: context
           .get_instance(Phong_Shader)
           .material(Color.of(0, 0, 0, 1), {
@@ -93,7 +138,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           .get_instance(Phong_Shader)
           .material(Color.of(0, 0, 0, 1), {//(Color.of(0.8, 0.9, 1, 1)
             ambient: .6,
-            texture:context.get_instance("assets/wall.jpg",true)
+            texture:context.get_instance("assets/white_wood.jpg",true)
           }),
       balloon: context
           .get_instance(Phong_Shader)
@@ -111,9 +156,9 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       frame: context.get_instance(Phong_Shader).material(Color.of(1,0,0,1)),
       floor: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, 1), {
         ambient: 1,
-        texture: context.get_instance("assets/ground.jpg", true)
+        texture: context.get_instance("assets/wood_floor.jpg", true)
       }),
-      shadow: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, .6), {
+      shadow: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, .7), {
         ambient: 1,
         diffusivity: 0,
         specularity: 0,
@@ -121,12 +166,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     };
 
     this.lights = [
-      new Light(Vec.of(0, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(25, 0, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 100000),
-      new Light(Vec.of(0, 0, 20, 1), Color.of(1, 1, 1, 1), 1000),
-      new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)
+      new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 10000),
+      new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 10000),
+      new Light(Vec.of(-20, 10, 20, 1), Color.of(1, 1, 1, 1), 1000),
+      new Light(Vec.of(-20, 10, -20, 1), Color.of(1, 1, 1, 1), 1000),
+      new Light(Vec.of(20, 10, 20, 1), Color.of(1, 1, 1, 1), 1000),
+      new Light(Vec.of(20, 10, -20, 1), Color.of(1, 1, 1, 1), 1000),
+      new Light(Vec.of(0, 10, 20, 1), Color.of(1, 1, 1, 1), 1000),
+      new Light(Vec.of(0, 10, -20, 1), Color.of(1, 1, 1, 1), 1000)
     ];
 
     this.move_l_pressed = this.move_r_pressed = this.move_u_pressed = this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
@@ -228,7 +275,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.mirror_2 = Mat4.identity().times(Mat4.translation([-12, 0, 0]));
     this.mirror_3 = Mat4.identity().times(Mat4.translation([12, 0, 0]));
 
-
     this.shapes.box_3.draw( //floor
         graphics_state,
         identity
@@ -243,6 +289,34 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([2.5, 10, .05])),
         this.materials.funhouse_wall
     );
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-6, 5, 0]))
+            .times(Mat4.scale([1.75, 1.5, .1])),
+        this.materials.pictures
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-6, 5, 0]))
+            .times(Mat4.scale([1.5, 1.25, .11])),
+        this.materials.pictures1
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([6, 5, 0]))
+            .times(Mat4.scale([1.75, 1.5, .1])),
+        this.materials.pictures
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([6, 5, 0]))
+            .times(Mat4.scale([1.5, 1.25, .11])),
+        this.materials.pictures5
+    )
     this.shapes.box_2.draw( //middle right
         graphics_state,
         identity
@@ -250,6 +324,52 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([2.5, 10, .05])),
         this.materials.funhouse_wall
     );
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-25, 3.5, -29.9]))
+            .times(Mat4.scale([1.1, 5/3+.1, .05])),
+        this.materials.pictures
+    )
+    let cart_pos = identity
+        .times(Mat4.translation([-25, 3.5, -29.8]))
+        .times(Mat4.scale([1, 5/3, .05]));
+    this.shapes.box.draw( //middle right
+        graphics_state,
+        cart_pos,
+        this.materials.cart
+    );
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([25, 3.5, -29.9]))
+            .times(Mat4.scale([1.6, 7.5/3+.1, .05])),
+        this.materials.pictures
+    )
+    let ele = identity
+        .times(Mat4.translation([25, 3.5, -29.8]))
+        .times(Mat4.scale([1.5, 7.5/3, .05]));
+    this.shapes.box.draw( //middle right
+        graphics_state,
+        ele,
+        this.materials.pictures3
+    );
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([0, 3.5, -29.9]))
+            .times(Mat4.scale([2.1, 10/3+.1, .05])),
+        this.materials.pictures
+    )
+    let clown = identity
+        .times(Mat4.translation([0, 3.5, -29.8]))
+        .times(Mat4.scale([2, 10/3, .05]));
+    this.shapes.box.draw( //middle right
+        graphics_state,
+        clown,
+        this.materials.pictures4
+    );
+
     this.shapes.box_1.draw( //left side
         graphics_state,
         identity
@@ -278,7 +398,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([30,.5,.01])),
         this.materials.funhouse_wall
     )
-    this.shapes.box.draw( //outside boxwall
+    this.shapes.box_5.draw( //outside boxwall
         graphics_state,
         identity
             .times(Mat4.translation([0,-5,0]))
@@ -304,7 +424,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
 
   }
   draw_balloon_help(graphics_state,pos,t){
-    this.draw_balloon(graphics_state, [pos[0], [pos[1][0], pos[1][1], pos[1][2], (pos[1][3] + 0.25 * Math.sin(t))], pos[2], pos[3]]);
+    this.draw_balloon(graphics_state, [[pos[0][0], pos[0][1], pos[0][2], pos[0][3]+0.125*Math.sin(t)], [pos[1][0], pos[1][1], pos[1][2], (pos[1][3] + 0.25 * Math.sin(t))], pos[2], pos[3]]);
+  }
+  draw_arm_help(graphics_state,pos,t)
+  {
+    let pos_1 = new Mat(pos[0], pos[1], pos[2], pos[3]);
+    pos_1 = pos_1.times(Mat4.rotation(-0.125*Math.sin(t), [0,0,1]));
+    this.shapes.arm.draw(graphics_state, pos_1 ,this.materials.legs);
   }
   draw_shadow_help(graphics_state,pos)
   {
@@ -316,12 +442,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           [pos[1][0], pos[1][1], pos[1][2], 0],
           [pos[2][0],pos[2][1],pos[2][2]*scale*scale_2,pos[2][3]], pos[3]], this.materials.shadow.override({ambient: ambient_scale}));
   }
-  draw_avatar_help(graphics_state,pos) {
+  draw_avatar_help(graphics_state,pos,t) {
     //this.shapes.cone.draw(graphics_state, pos, this.materials.floor)
     this.shapes.head.draw(graphics_state, pos, this.materials.face)
     this.shapes.body.draw(graphics_state, pos, this.materials.avatar)
     this.shapes.leg.draw(graphics_state, pos, this.materials.legs)
     this.shapes.hair.draw(graphics_state, pos, this.materials.hair)
+    this.draw_arm_help(graphics_state,pos,t);
   }
   display(graphics_state) {
     graphics_state.lights = this.lights; // Use the lights stored in this.lights.
@@ -334,12 +461,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     if(this.avatar_pos[1][3]>0)
       this.avatar_pos[1][3] -= dt;
 
-    /*this.shapes.spike.draw(
-        graphics_state,
-        this.avatar_pos,
-        this.materials.avatar
-    );*/
-    this.draw_avatar_help(graphics_state, this.avatar_pos);
+    this.draw_avatar_help(graphics_state, this.avatar_pos,t );
 
 
     //this.shapes.avatar.draw(this.mycontext, graphics_state, this.avatar_pos,this.materials.avatar);
@@ -359,12 +481,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       copy[3]
     ];
     if (this.avatar_pos[0][3] >= -4 && this.avatar_pos[0][3] <= 4) {
-      /*this.shapes.spike.draw(
-          graphics_state,
-          reflected_mat,
-          this.materials.avatar
-      );*/
-      this.draw_avatar_help(graphics_state,reflected_mat);
+      this.draw_avatar_help(graphics_state,reflected_mat,t);
       this.draw_balloon_help(graphics_state,reflected_mat,t);
       this.draw_shadow_help(graphics_state,reflected_mat);
     }
@@ -380,13 +497,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
         copy[3]
       ];
-      /*this.shapes.spike.draw(
-          graphics_state,
-          reflected_mat,
-          this.materials.avatar*
 
-     );*/
-      this.draw_avatar_help(graphics_state,reflected_mat);
+      this.draw_avatar_help(graphics_state,reflected_mat,t);
       this.draw_balloon_help(graphics_state,reflected_mat,t);
       this.draw_shadow_help(graphics_state,reflected_mat);
     }
@@ -424,13 +536,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         ];
         this.draw_shadow_help(graphics_state,reflected_mat);
       }
-      /*this.shapes.spike.draw(
-          graphics_state,
-          reflected_mat,
-          this.materials.avatar
-      );*/
       this.draw_balloon_help(graphics_state,reflected_mat,t);
-      this.draw_avatar_help(graphics_state,reflected_mat);
+      this.draw_avatar_help(graphics_state,reflected_mat,t);
     }
 
     //camera coordinates
