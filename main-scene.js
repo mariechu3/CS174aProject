@@ -502,13 +502,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
       copy[3]
     ];
-    if (this.avatar_pos[0][3] >= -4 && this.avatar_pos[0][3] <= 4) {
+    if (this.avatar_pos[0][3] >= -8 && this.avatar_pos[0][3] <= 8) {
       this.draw_avatar_help(graphics_state,reflected_mat,t);
       this.draw_balloon_help(graphics_state,reflected_mat,t);
       this.draw_shadow_help(graphics_state,reflected_mat);
     }
     //convex case will always be upright
-    else if (this.avatar_pos[0][3] < -7) {
+    else if (this.avatar_pos[0][3] < -8) {
       scale =
           (-1 * this.mirror_eq(-3, this.avatar_pos[2][3])) /
           this.avatar_pos[2][3];
@@ -525,7 +525,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       this.draw_shadow_help(graphics_state,reflected_mat);
     }
     //concave cases
-    else if (this.avatar_pos[0][3] > 7) {
+    else if (this.avatar_pos[0][3] > 8) {
       //if needs to be inverted
       if (this.mirror_eq(4.0, this.avatar_pos[2][3]) > 0) {
         scale =
