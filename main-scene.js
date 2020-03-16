@@ -1,3 +1,4 @@
+/***** MIRROR SCENE******/
 window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends Scene_Component {
   constructor(context, control_box) {
     // The scene begins by requesting the camera, shapes, and materials it will need.
@@ -84,8 +85,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           }),
       pictures: context
           .get_instance(Phong_Shader)
-              .material(Color.of(0, 0, 0, 1), {
-                ambient: 1,
+              .material(Color.of(0, 0, 1, 1), {
+                ambient: .5,
               }),
       pictures1: context
           .get_instance(Phong_Shader)
@@ -163,10 +164,10 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           .material(Color.of(0.95, 1, 0.95, 1), { ambient: 0.1, diffusivity: 0 }),
       frame: context.get_instance(Phong_Shader).material(Color.of(1,0,0,1)),
       floor: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, 1), {
-        ambient: 1,
+        ambient: .75,
         texture: context.get_instance("assets/wood_floor.jpg", true)
       }),
-      shadow: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, .7), {
+      shadow: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, .8), {
         ambient: 1,
         diffusivity: 0,
         specularity: 0,
@@ -197,8 +198,10 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     } else if (dir === 4) {
       if (this.avatar_pos[2][3] > 1.5)
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, -0.5]));
-    } else if (dir === 5)
-      this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, 0.5]));
+    } else if (dir === 5){
+      if (this.avatar_pos[2][3] < 29.0)
+        this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, 0.5]));
+      }
     else this.avatar_pos = this.avatar_pos.times(Mat4.translation([0.5, 0, 0]));
 
     this.move_l_pressed = this.move_r_pressed = this.move_u_pressed = this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
@@ -596,6 +599,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
   }
 };
 
+
+/**** SECOND SCENE *****/
 window.Main_Scene = window.classes.Main_Scene = class Main_Scene extends Scene_Component {
   constructor(context, control_box) {
     // The scene begins by requesting the camera, shapes, and materials it will need.
@@ -826,6 +831,8 @@ window.Main_Scene = window.classes.Main_Scene = class Main_Scene extends Scene_C
 
 };
 
+
+/***** THIRD SCENE *********/
 window.Dart_Scene= window.classes.Dart_Scene =
     class Dart_Scene extends Scene_Component {
         constructor(context, control_box)
@@ -1888,3 +1895,73 @@ class Flag_Shader extends Phong_Shader
         }`;
     }
 }
+
+/*tester */
+
+window.Test_Scene = window.classes.Test_Scene = class Test_Scene extends Scene_Component {
+  constructor(context, control_box) {
+    // The scene begins by requesting the camera, shapes, and materials it will need.
+    super(context, control_box);
+    // First, include a secondary Scene that provides movement controls:
+    if (!context.globals.has_controls)
+      context.register_scene_component(
+          new Movement_Controls(context, control_box.parentElement.insertCell())
+      );
+
+    context.globals.graphics_state.camera_transform = Mat4.look_at(
+        Vec.of(0, 5, 35),
+        Vec.of(0, 0, 0),
+        Vec.of(0, 1, 0)
+    );
+    this.initial_camera_location = Mat4.inverse(
+        context.globals.graphics_state.camera_transform
+    );
+
+    const r = context.width / context.height;
+    context.globals.graphics_state.projection_transform = Mat4.perspective(
+        Math.PI / 4,
+        r,
+        0.1,
+        1000
+    );
+
+    const shapes = {
+      // TODO:  Added in as many shapes as we need for this project
+      bell: new Bell(),
+      bell_inner: new Bell_inner(),
+      bell_arm: new Bell_arm(),
+
+    };
+
+    this.submit_shapes(context, shapes);
+
+    // Make some Material objects available to you:
+    this.materials = {
+      bell : context.get_instance(Phong_Shader).material(Color.of(.96,.72,0,1), {ambient: 0.6}),
+      bell_inner : context.get_instance(Phong_Shader).material(Color.of(.75,.75,.75,1), {ambient: 0.6}),
+
+    };
+
+    this.lights = [new Light([10,20,0], Color.of(1,1,1,1), 100000)];
+
+
+
+  }
+
+  make_control_panel() {
+    // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
+
+
+  }
+
+  display(graphics_state) {
+    graphics_state.lights = this.lights; // Use the lights stored in this.lights.
+    const t = graphics_state.animation_time / 1000,
+        dt = graphics_state.animation_delta_time / 1000;
+    let identity = Mat4.identity();
+    this.shapes.bell.draw(graphics_state, identity,this.materials.bell );
+    this.shapes.bell_inner.draw(graphics_state, identity,this.materials.bell_inner );
+    this.shapes.bell_arm.draw(graphics_state,identity,this.materials.bell);
+  }
+
+};

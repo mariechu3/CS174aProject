@@ -577,6 +577,29 @@ window.Arm = window.classes.Arm =
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
     }}
 
+window.Bell = window.classes.Bell =
+    class Bell extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor()
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([0,0,.25]).times(Mat4.scale([1,1,0.5])));
+        Cylindrical_Tube.insert_transformed_copy_into(this, [20,20, [2,2]], Mat4.translation([0,0,0]).times(Mat4.scale([1,1,.5])));
+    }}
+window.Bell_inner = window.classes.Bell_inner =
+    class Bell extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor()
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([0,0,.75]).times(Mat4.scale([.15,.15,0.05])));
+    }}
+window.Bell_arm = window.classes.Bell_arm =
+    class Bell extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor()
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([-1.7,-0.1,0]).times(Mat4.scale([.2,.2,0.2])));
+        Cylindrical_Tube.insert_transformed_copy_into(this, [20,20, [2,2]], Mat4.translation([-.5,-.8,0]).times(Mat4.rotation(-Math.PI, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.1,.5,.1])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [20,20, [2,2]], Mat4.translation([-.9,-.7,0]).times(Mat4.rotation(-Math.PI/8, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.1,.5,.1])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [20,20, [2,2]], Mat4.translation([-1.1,-.6,0]).times(Mat4.rotation(-Math.PI/6, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.1,.5,.1])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Cylindrical_Tube.insert_transformed_copy_into(this, [20,20, [2,2]], Mat4.translation([-1.4,-.35,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.1,.5,.1])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+    }}
 
 
 
@@ -1035,12 +1058,12 @@ class Movement_Controls extends Scene_Component    // Movement_Controls is a Sce
   make_control_panel()                                                        // This function of a scene sets up its keyboard shortcuts.
     { const globals = this.globals;
       this.control_panel.innerHTML += "Click and drag the scene to <br> spin your viewpoint around it.<br>";
-      this.key_triggered_button( "Up",     [ "j" ], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0 );  this.new_line();
-      this.key_triggered_button( "Forward",[ "i" ], () => this.thrust[2] =  1, undefined, () => this.thrust[2] = 0 );  this.new_line();
+      this.key_triggered_button( "Up",     [ "4" ], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0 );  this.new_line();
+      this.key_triggered_button( "Forward",[ "5" ], () => this.thrust[2] =  1, undefined, () => this.thrust[2] = 0 );  this.new_line();
      // this.key_triggered_button( "Left",   [ "3" ], () => this.thrust[0] =  1, undefined, () => this.thrust[0] = 0 );  this.new_line();
-      this.key_triggered_button( "Back",   [ "k" ], () => this.thrust[2] = -1, undefined, () => this.thrust[2] = 0 );  this.new_line();
+      this.key_triggered_button( "Back",   [ "6" ], () => this.thrust[2] = -1, undefined, () => this.thrust[2] = 0 );  this.new_line();
      // this.key_triggered_button( "Right",  [ "5" ], () => this.thrust[0] = -1, undefined, () => this.thrust[0] = 0 );  this.new_line();
-      this.key_triggered_button( "Down",   [ "l" ], () => this.thrust[1] =  1, undefined, () => this.thrust[1] = 0 );
+      this.key_triggered_button( "Down",   [ "7" ], () => this.thrust[1] =  1, undefined, () => this.thrust[1] = 0 );
 
       const speed_controls = this.control_panel.appendChild( document.createElement( "span" ) );
       speed_controls.style.margin = "30px";
