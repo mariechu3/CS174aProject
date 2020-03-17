@@ -59,7 +59,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       mouse: new Mouse(20,20,[2,2]),
       mouse_parts: new Mouse_parts(20,20,[2,2]),
       mouse_eyes: new Mouse_eyes(20,20,[2,2]),
-      mouse_legs: new Mouse_legs(20,20,[2,2]),
     };
     shapes.box_3.texture_coords = shapes.box_3.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 2));
     shapes.box_2.texture_coords = shapes.box_2.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 6));
@@ -190,8 +189,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     };
     this.prev = 0;
     this.mouse_pos = Mat4.identity();
-    this.leg_pos1 = Mat4.identity();
-    this.leg_pos2 = Mat4.identity();
     this.lights = [
       new Light(Vec.of(0, 0, 5, 1), Color.of(1, 1, 1, 1), 100),
       new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 10000),
@@ -622,30 +619,21 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
   }
   draw_mouse_help(graphics_state,t){
     let xpos = 20*Math.sin(t*0.5);
-    let legs = 0.03*Math.sin(t*2);
-    let model_transform = Mat4.identity().times(Mat4.translation([xpos, -1.9, 2]));
+    let zpos = .25*Math.sin(t*5);
+    let model_transform = Mat4.identity().times(Mat4.translation([xpos, -1.9, 2+zpos]));
     if (this.prev-xpos < 0)
       model_transform = model_transform.times(Mat4.rotation(Math.PI,[0,1,0]));
     this.shapes.mouse.draw(graphics_state,model_transform, this.materials.mouse);
     this.shapes.mouse_parts.draw(graphics_state,model_transform, this.materials.mouse_parts);
     this.shapes.mouse_eyes.draw(graphics_state,model_transform, this.materials.mouse_eyes);
-    this.shapes.mouse_legs.draw(graphics_state,Mat4.translation([-.15-legs,0,0]).times(model_transform), this.materials.mouse);
-    this.shapes.mouse_legs.draw(graphics_state,Mat4.translation([.15+legs,0,0]).times(model_transform), this.materials.mouse);
     this.prev = xpos;
     this.mouse_pos = model_transform;
-    this.leg_pos1 = Mat4.translation([-.15-legs,0,0]).times(model_transform);
-    this.leg_pos2= Mat4.translation([.15+legs,0,0]).times(model_transform);
   }
   draw_mouse_image_help(graphics_state,pos)
   {
     this.shapes.mouse.draw(graphics_state,pos, this.materials.mouse);
     this.shapes.mouse_parts.draw(graphics_state,pos, this.materials.mouse_parts);
     this.shapes.mouse_eyes.draw(graphics_state,pos, this.materials.mouse_eyes);
-    this.shapes.mouse_legs.draw(graphics_state,pos, this.materials.mouse);
-  }
-  draw_image_legs(graphics_state,pos)
-  {
-    this.shapes.mouse_legs.draw(graphics_state,pos, this.materials.mouse);
   }
   draw_mouse_shadow_help(graphics_state,pos,passed,num)
   {
@@ -758,22 +746,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         copy[3]
       ];
       this.draw_mouse_image_help(graphics_state, reflected_mat);
-      copy = this.leg_pos1;
-      reflected_mat = [
-        copy[0],
-        copy[1],
-        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
-        copy[3]
-      ];
-      this.draw_image_legs(graphics_state,reflected_mat);
-      copy = this.leg_pos2;
-      reflected_mat = [
-        copy[0],
-        copy[1],
-        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
-        copy[3]
-      ];
-      this.draw_image_legs(graphics_state,reflected_mat);
       copy = Mat4.translation([0,1.9,0]).times(this.mouse_pos).times(Mat4.scale([scale, scale, scale]));
       reflected_mat = [
         copy[0],
@@ -797,22 +769,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       ];
 
       this.draw_mouse_image_help(graphics_state,reflected_mat);
-      copy = this.leg_pos1;
-      reflected_mat = [
-        copy[0],
-        copy[1],
-        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
-        copy[3]
-      ];
-      this.draw_image_legs(graphics_state,reflected_mat);
-      copy = this.leg_pos2;
-      reflected_mat = [
-        copy[0],
-        copy[1],
-        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
-        copy[3]
-      ];
-      this.draw_image_legs(graphics_state,reflected_mat);
       copy = Mat4.translation([0,1.9,0]).times(this.mouse_pos).times(Mat4.scale([scale, scale, scale]));
       reflected_mat = [
         copy[0],
@@ -856,22 +812,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         ];
       }
       this.draw_mouse_image_help(graphics_state,reflected_mat);
-      copy = this.leg_pos1;
-      reflected_mat = [
-        copy[0],
-        copy[1],
-        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
-        copy[3]
-      ];
-      this.draw_image_legs(graphics_state,reflected_mat);
-      copy = this.leg_pos2;
-      reflected_mat = [
-        copy[0],
-        copy[1],
-        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
-        copy[3]
-      ];
-      this.draw_image_legs(graphics_state,reflected_mat);
       copy = Mat4.translation([0,1.9,0]).times(this.mouse_pos).times(Mat4.scale([scale, scale, scale]));
       reflected_mat = [
         copy[0],
@@ -879,7 +819,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
         copy[3]
       ];
-      this.draw_mouse_shadow_help(graphics_state,reflected_mat,.5,-.05)
+      //this.draw_mouse_shadow_help(graphics_state,reflected_mat,.5,-.5)
     }
 
     //camera coordinates

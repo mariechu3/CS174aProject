@@ -564,6 +564,8 @@ window.Mouse = window.classes.Mouse =
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([0,0,0]).times(Mat4.scale([.4,.25,.25])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(Math.PI/4, [1,0,0]).times(Mat4.translation([-.2,.3,0])).times(Mat4.scale([.05,.2,.2])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(-Math.PI/4, [1,0,0]).times(Mat4.translation([-.2,.3,0])).times(Mat4.scale([.05,.2,.2])));
+        Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,.1]).times(Mat4.scale([.4,.1,.3])));
+        Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,-.1]).times(Mat4.scale([.4,.1,.3])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-.38,0,0]).times(Mat4.scale([.12,.2,.2])).times(Mat4.rotation(-Math.PI/2, [0,1,0])));
     }}
 window.Mouse_parts = window.classes.Mouse_parts =
@@ -581,14 +583,7 @@ window.Mouse_parts = window.classes.Mouse_parts =
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,.1,-.2]).times(Mat4.rotation(7*Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,0,-.2]).times(Mat4.rotation(Math.PI, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
     }}
-window.Mouse_legs = window.classes.Mouse_legs =
-    class Mouse_legs extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
-    { constructor(rows,columns,texture_range)
-    { super( "positions", "normals", "texture_coords" );
-        //Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,.1]).times(Mat4.scale([.4,.1,.3])));
-        //Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,-.1]).times(Mat4.scale([.4,.1,.3])));
-        Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,0]).times(Mat4.scale([.4,.1,.3])).times(Mat4.rotation(Math.PI/2,[0,1,0])));
-    }}
+
 window.Mouse_eyes = window.classes.Mouse_parts =
     class Mouse_parts extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor(rows,columns,texture_range)
