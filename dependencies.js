@@ -436,7 +436,8 @@ class Cylindrical_Tube extends Surface_Of_Revolution    // An open tube shape wi
 
 window.Cylindrical_Tube_2 = window.classes.Cylindrical_Tube_2 =
     class Cylindrical_Tube_2 extends Surface_Of_Revolution    // An open tube shape with equally sized sections, pointing down Z locally.
-    { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [1, 0, .5], [1, .5, -.5] ), texture_range ); } }
+   // { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [1, 0, .5], [1, .5, -.5] ), texture_range ); } }
+    { constructor( rows, columns, texture_range ) { super( rows, columns, Vec.cast( [1, 0, .5], [1, -1, -.5] ), texture_range ); } }
 
 window.Cylindrical_Tube_3 = window.classes.Cylindrical_Tube_3 =
     class Cylindrical_Tube_3 extends Surface_Of_Revolution    // An open tube shape with equally sized sections, pointing down Z locally.
@@ -556,6 +557,46 @@ window.Body = window.classes.Body =
         Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([.8,2.3,0]).times(Mat4.rotation(Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,1,0])).times(Mat4.scale([.05,.05,.05])));
         Torus_2.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-.8,2.3,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(-Math.PI/2, [0,1,0])).times(Mat4.scale([.05,.05,.05])));
     }}
+window.Mouse = window.classes.Mouse =
+    class Mouse extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([0,0,0]).times(Mat4.scale([.4,.25,.25])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(Math.PI/4, [1,0,0]).times(Mat4.translation([-.2,.3,0])).times(Mat4.scale([.05,.2,.2])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(-Math.PI/4, [1,0,0]).times(Mat4.translation([-.2,.3,0])).times(Mat4.scale([.05,.2,.2])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-.38,0,0]).times(Mat4.scale([.12,.2,.2])).times(Mat4.rotation(-Math.PI/2, [0,1,0])));
+    }}
+window.Mouse_parts = window.classes.Mouse_parts =
+    class Mouse_parts extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(Math.PI/4, [1,0,0]).times(Mat4.translation([-.25,.3,0])).times(Mat4.scale([.02,.15,.15])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(-Math.PI/4, [1,0,0]).times(Mat4.translation([-.25,.3,0])).times(Mat4.scale([.02,.15,.15])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.45,0,0]).times(Mat4.scale([.05,.05,.05])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation(Math.PI/8, [0,0,1]).times(Mat4.translation([.8,-.2,0])).times(Mat4.scale([.5,.05,.05])).times(Mat4.rotation(Math.PI/2, [0,1,0])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,.1,.2]).times(Mat4.rotation(-Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,-.1,.2]).times(Mat4.rotation(Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,0,.2]).times(Mat4.rotation(0, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,-.1,-.2]).times(Mat4.rotation(-7*Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,.1,-.2]).times(Mat4.rotation(7*Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,0,-.2]).times(Mat4.rotation(Math.PI, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+    }}
+window.Mouse_legs = window.classes.Mouse_legs =
+    class Mouse_legs extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        //Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,.1]).times(Mat4.scale([.4,.1,.3])));
+        //Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,-.1]).times(Mat4.scale([.4,.1,.3])));
+        Legs.insert_transformed_copy_into(this,[rows,columns,texture_range], Mat4.translation([0,-.1,0]).times(Mat4.scale([.4,.1,.3])).times(Mat4.rotation(Math.PI/2,[0,1,0])));
+    }}
+window.Mouse_eyes = window.classes.Mouse_parts =
+    class Mouse_parts extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.35,0.05,-.1]).times(Mat4.scale([.03,.03,.03])));
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.35,0.05,.1]).times(Mat4.scale([.03,.03,.03])));
+
+    }}
 window.Legs = window.classes.Legs =
     class Legs extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
     { constructor(rows,columns,texture_range)
@@ -563,8 +604,7 @@ window.Legs = window.classes.Legs =
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.3,-1.3,0]).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
         //Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.8,-.2,0]).times(Mat4.rotation(-Math.PI/3, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
-        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([1.12,-.75,0]).times(Mat4.scale([.148,.148,.148])));
+
 
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.3,-2,0]).times(Mat4.scale([.148,.148,.148])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([.3,-2,0]).times(Mat4.scale([.148,.148,.148])));
@@ -575,6 +615,13 @@ window.Arm = window.classes.Arm =
     { super( "positions", "normals", "texture_coords" );
         Subdivision_Sphere.insert_transformed_copy_into(this, [4],  Mat4.translation([-1.48,1.18,0]).times(Mat4.scale([.148,.148,.148])));
         Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([-1,.7,0]).times(Mat4.rotation(-Math.PI/4, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+    }}
+window.Arm_still = window.classes.Arm =
+    class Arm extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Cylindrical_Tube.insert_transformed_copy_into(this, [rows,columns, texture_range], Mat4.translation([.8,-.2,0]).times(Mat4.rotation(-Math.PI/3, [0,0,1])).times(Mat4.rotation(Math.PI/2, [0,0,1])).times(Mat4.scale([.15,1.3,.15])).times(Mat4.rotation((-Math.PI/2), [1,0,0])))
+        Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([1.12,-.75,0]).times(Mat4.scale([.148,.148,.148])));
     }}
 
 window.Bell = window.classes.Bell =
