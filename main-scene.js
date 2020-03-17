@@ -85,8 +85,9 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           }),
       pictures: context
           .get_instance(Phong_Shader)
-              .material(Color.of(0, 0, 1, 1), {
-                ambient: .5,
+              .material(Color.of(0, 0, 0, 1), {
+                ambient: .7,
+                texture: context.get_instance("assets/picture_frame.jpg",true)
               }),
       pictures1: context
           .get_instance(Phong_Shader)
@@ -162,7 +163,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       mirror: context
           .get_instance(Phong_Shader)
           .material(Color.of(0.95, 1, 0.95, 1), { ambient: 0.1, diffusivity: 0 }),
-      frame: context.get_instance(Phong_Shader).material(Color.of(1,0,0,1)),
+      frame: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: .7, texture: context.get_instance("assets/blue_wood.jpg",true)}),
       floor: context.get_instance(Phong_Shader).material(Color.of(0, 0, 0, 1), {
         ambient: .75,
         texture: context.get_instance("assets/wood_floor.jpg", true)
@@ -175,6 +176,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     };
 
     this.lights = [
+      new Light(Vec.of(0, 0, 5, 1), Color.of(1, 1, 1, 1), 100),
       new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 10000),
       new Light(Vec.of(20, 10, 0, 1), Color.of(1, 1, 1, 1), 10000),
       new Light(Vec.of(-20, 10, 20, 1), Color.of(1, 1, 1, 1), 1000),
@@ -300,6 +302,36 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([2.5, 10, .05])),
         this.materials.funhouse_wall
     );
+    /*frame left*/
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-8.5, 4, 0]))
+            .times(Mat4.scale([.2, 6, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-15, 4, 0]))
+            .times(Mat4.scale([.2, 6, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-11.75, 10, 0]))
+            .times(Mat4.scale([3.45, .2, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-11.75, -2, 0]))
+            .times(Mat4.scale([3.45, .2, .1])),
+        this.materials.frame
+    )
+    /****/
     this.shapes.box.draw(
         graphics_state,
         identity
@@ -331,8 +363,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.shapes.box.draw(
         graphics_state,
         identity
-            .times(Mat4.translation([-12, 0, -10]))
-            .times(Mat4.scale([.75, .5, .01])),
+            .times(Mat4.translation([-13, 0, -7]))
+            .times(Mat4.scale([.5, .5, .01])),
         this.materials.popcorn
     )
     this.shapes.box.draw(
@@ -349,6 +381,66 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([2.5, 10, .05])),
         this.materials.funhouse_wall
     );
+    /*frame right*/
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([8.5, 4, 0]))
+            .times(Mat4.scale([.2, 6, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([15, 4, 0]))
+            .times(Mat4.scale([.2, 6, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([11.75, 10, 0]))
+            .times(Mat4.scale([3.45, .2, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([11.75, -2, 0]))
+            .times(Mat4.scale([3.45, .2, .1])),
+        this.materials.frame
+    )
+    /****/
+    /*frame middle*/
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([3.25, 4, 0]))
+            .times(Mat4.scale([.2, 6, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([-3.25, 4, 0]))
+            .times(Mat4.scale([.2, 6, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([0, 10, 0]))
+            .times(Mat4.scale([3.45, .2, .1])),
+        this.materials.frame
+    )
+    this.shapes.box.draw(
+        graphics_state,
+        identity
+            .times(Mat4.translation([0, -2, 0]))
+            .times(Mat4.scale([3.45, .2, .1])),
+        this.materials.frame
+    )
+    /****/
     this.shapes.box.draw(
         graphics_state,
         identity
@@ -420,7 +512,35 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         graphics_state,
         identity
             .times(Mat4.translation([0,-2.5,0]))
-            .times(Mat4.scale([30,.5,.01])),
+            .times(Mat4.scale([30,.5,.1])),
+        this.materials.funhouse_wall
+    )
+    this.shapes.box_2.draw( //bottom
+        graphics_state,
+        identity
+            .times(Mat4.translation([-30,-2.5,0]))
+            .times(Mat4.scale([.1,.5,30])),
+        this.materials.funhouse_wall
+    )
+    this.shapes.box_2.draw( //bottom
+        graphics_state,
+        identity
+            .times(Mat4.translation([30,-2.5,0]))
+            .times(Mat4.scale([.1,.5,30])),
+        this.materials.funhouse_wall
+    )
+    this.shapes.box_2.draw( //bottom
+        graphics_state,
+        identity
+            .times(Mat4.translation([0,-2.5,30]))
+            .times(Mat4.scale([30,.5,.1])),
+        this.materials.funhouse_wall
+    )
+    this.shapes.box_2.draw( //bottom
+        graphics_state,
+        identity
+            .times(Mat4.translation([0,-2.5,-30]))
+            .times(Mat4.scale([30,.5,.1])),
         this.materials.funhouse_wall
     )
     this.shapes.box.draw( //outside boxwall
