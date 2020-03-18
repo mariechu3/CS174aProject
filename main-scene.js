@@ -59,6 +59,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       mouse: new Mouse(20,20,[2,2]),
       mouse_parts: new Mouse_parts(20,20,[2,2]),
       mouse_eyes: new Mouse_eyes(20,20,[2,2]),
+      mouse_tail: new Mouse_tail(20,20,[2,2]),
     };
     shapes.box_3.texture_coords = shapes.box_3.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 2));
     shapes.box_2.texture_coords = shapes.box_2.texture_coords.map(v => Vec.of(v[0] * 2, v[1] * 6));
@@ -189,6 +190,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     };
     this.prev = 0;
     this.mouse_pos = Mat4.identity();
+    this.tail_pos = Mat4.identity();
     this.lights = [
       new Light(Vec.of(0, 0, 5, 1), Color.of(1, 1, 1, 1), 100),
       new Light(Vec.of(-20, 10, 0, 1), Color.of(1, 1, 1, 1), 10000),
@@ -618,7 +620,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.draw_arm_help(graphics_state,pos,t);
   }
   draw_mouse_help(graphics_state,t){
-    let xpos = 20*Math.sin(t*0.5);
+    let xpos = 18g*Math.sin(t*0.4);
     let zpos = .25*Math.sin(t*5);
     let model_transform = Mat4.identity().times(Mat4.translation([xpos, -1.9, 2+zpos]));
     if (this.prev-xpos < 0)
@@ -626,6 +628,8 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.shapes.mouse.draw(graphics_state,model_transform, this.materials.mouse);
     this.shapes.mouse_parts.draw(graphics_state,model_transform, this.materials.mouse_parts);
     this.shapes.mouse_eyes.draw(graphics_state,model_transform, this.materials.mouse_eyes);
+    this.tail_pos = model_transform.times(Mat4.rotation(Math.PI/8*Math.sin(t*4),[0,1,0]));
+    this.shapes.mouse_tail.draw(graphics_state,this.tail_pos,this.materials.mouse_parts);
     this.prev = xpos;
     this.mouse_pos = model_transform;
   }
@@ -746,6 +750,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         copy[3]
       ];
       this.draw_mouse_image_help(graphics_state, reflected_mat);
+      copy = this.tail_pos;
+      reflected_mat = [
+        copy[0],
+        copy[1],
+        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
+        copy[3]
+      ];
+      this.shapes.mouse_tail.draw(graphics_state,reflected_mat,this.materials.mouse_parts);
       copy = Mat4.translation([0,1.9,0]).times(this.mouse_pos).times(Mat4.scale([scale, scale, scale]));
       reflected_mat = [
         copy[0],
@@ -767,8 +779,15 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
         copy[3]
       ];
-
       this.draw_mouse_image_help(graphics_state,reflected_mat);
+      copy = this.tail_pos.times(Mat4.scale([scale, scale, scale]));
+      reflected_mat = [
+        copy[0],
+        copy[1],
+        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
+        copy[3]
+      ];
+      this.shapes.mouse_tail.draw(graphics_state,reflected_mat,this.materials.mouse_parts);
       copy = Mat4.translation([0,1.9,0]).times(this.mouse_pos).times(Mat4.scale([scale, scale, scale]));
       reflected_mat = [
         copy[0],
@@ -812,6 +831,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         ];
       }
       this.draw_mouse_image_help(graphics_state,reflected_mat);
+      copy = this.tail_pos.times(Mat4.scale([scale, scale, scale]));
+      reflected_mat = [
+        copy[0],
+        copy[1],
+        [-1 * copy[2][0], -1 * copy[2][1], -1 * copy[2][2], -1 * copy[2][3]],
+        copy[3]
+      ];
+      this.shapes.mouse_tail.draw(graphics_state,reflected_mat,this.materials.mouse_parts);
       copy = Mat4.translation([0,1.9,0]).times(this.mouse_pos).times(Mat4.scale([scale, scale, scale]));
       reflected_mat = [
         copy[0],

@@ -575,13 +575,19 @@ window.Mouse_parts = window.classes.Mouse_parts =
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(Math.PI/4, [1,0,0]).times(Mat4.translation([-.25,.3,0])).times(Mat4.scale([.02,.15,.15])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.rotation(-Math.PI/4, [1,0,0]).times(Mat4.translation([-.25,.3,0])).times(Mat4.scale([.02,.15,.15])));
         Subdivision_Sphere.insert_transformed_copy_into(this, [4], Mat4.translation([-.45,0,0]).times(Mat4.scale([.05,.05,.05])));
-        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation(Math.PI/8, [0,0,1]).times(Mat4.translation([.8,-.2,0])).times(Mat4.scale([.5,.05,.05])).times(Mat4.rotation(Math.PI/2, [0,1,0])));
+        //Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation(Math.PI/8, [0,0,1]).times(Mat4.translation([.8,-.2,0])).times(Mat4.scale([.5,.05,.05])).times(Mat4.rotation(Math.PI/2, [0,1,0])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,.1,.2]).times(Mat4.rotation(-Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,-.1,.2]).times(Mat4.rotation(Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,0,.2]).times(Mat4.rotation(0, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,-.1,-.2]).times(Mat4.rotation(-7*Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,.1,-.2]).times(Mat4.rotation(7*Math.PI/6, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
         Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.translation([-0.45,0,-.2]).times(Mat4.rotation(Math.PI, [1,0,0])).times(Mat4.scale([.01,.01,.2])));
+    }}
+window.Mouse_tail = window.classes.Mouse_tail =
+    class Mouse_tail extends Shape                                         // Build a donut shape.  An example of a surface of revolution.
+    { constructor(rows,columns,texture_range)
+    { super( "positions", "normals", "texture_coords" );
+        Closed_Cone.insert_transformed_copy_into(this, [rows, columns, texture_range], Mat4.rotation(Math.PI/8, [0,0,1]).times(Mat4.translation([.8,-.2,0])).times(Mat4.scale([.5,.05,.05])).times(Mat4.rotation(Math.PI/2, [0,1,0])));
     }}
 
 window.Mouse_eyes = window.classes.Mouse_parts =
