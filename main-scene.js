@@ -620,7 +620,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.draw_arm_help(graphics_state,pos,t);
   }
   draw_mouse_help(graphics_state,t){
-    let xpos = 18g*Math.sin(t*0.4);
+    let xpos = 18*Math.sin(t*0.4);
     let zpos = .25*Math.sin(t*5);
     let model_transform = Mat4.identity().times(Mat4.translation([xpos, -1.9, 2+zpos]));
     if (this.prev-xpos < 0)
@@ -1170,7 +1170,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
                     fire : context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1, specularity: 1}),
                     blue_fire : context.get_instance(Phong_Shader).material(Color.of(44/255,83/255,143/255,1), {ambient: 1, diffusivity: 1,}),
                     yellow_fire : context.get_instance(Phong_Shader).material(Color.of(1,189/255,46/255,1), {ambient: 1, diffusivity: 1,}),
-                    fabric : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/classic.jpg", true)}),
                     table_wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/table_wood.jpg", true)}),
                     wood_tile : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1,  texture: context.get_instance("assets/high_res_wood_tile.jpg", true)}),
                     wood : context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/wood.png", true)}),
@@ -1191,7 +1190,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                            new Light(Vec.of(0, 0, -20, 1), Color.of(1, 1, 1, 1), 1000)];
 
             // physics variables
-            this.max_power = 200;
+            this.max_power = 150;
             this.power = 0;
             this.power_x = 0;
             this.power_y = 0;
@@ -1243,7 +1242,8 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             this.score = 0;
             this.max_socre = 0;
-
+            this.display_bulls_eye_sign = 0;
+            this.level = 1;
         }
 
         make_control_panel() {
@@ -1584,7 +1584,6 @@ window.Dart_Scene= window.classes.Dart_Scene =
             this.shapes.background_wall.draw(graphics_state, transform, this.materials.brick);
         }
 
-
         draw_background(graphics_state) {
 
             this.draw_table(graphics_state, 1,2,3);
@@ -1902,6 +1901,18 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             if (z_offset <= board_rad * 0.1 && y_offset <= board_rad * 0.1) {
                 console.log("Bulls EYE");
+
+                if (this.level === 1) {
+                  this.accel_z = Math.round(Math.random() * (4) + 12);
+                  this.level += 1;
+                } else if (this.level === 2) {
+                  this.accel_z = Math.round(Math.random() * (5) - 25);
+                  this.level += 1;
+                } else if (this.level === 3) {
+                  this.level += 1;
+                }
+
+                this.display_bulls_eye_sign = 12;
                 this.bulls_eye = true;
                 this.get_random();
                 this.score = 100;
@@ -2070,7 +2081,40 @@ window.Dart_Scene= window.classes.Dart_Scene =
 
             this.update_stat();
 
+            if (this.display_bulls_eye_sign > 0) {
+              // show sign after 2 seconds buffer
+              if (this.display_bulls_eye_sign > 7) {
+                document.getElementById("bull_img").style.display = 'inline';
+                document.getElementById("bull_font").style.display = "inline";
+              } else {
+                document.getElementById("bull_img").style.display = "none";
+                document.getElementById("bull_font").style.display = "none";
 
+                if (this.level === 2) {
+                  document.getElementById("levelup").innerText =
+                      "Unlocked Level 2! \nEast Wind with speed "+ this.accel_z.toString();
+                  document.getElementById("levelup").style.display = "inline";
+                } else if (this.level === 3) {
+                  document.getElementById("levelup").innerText =
+                      "Unlocked Level 3! \nWest Wind with speed " + Math.abs(this.accel_z).toString();
+                  document.getElementById("levelup").style.display = "inline";
+                } else if (this.level === 4) {
+                  document.getElementById("allclear").style.display = "inline";
+                  document.getElementById("mouse_trap").style.display = "inline";
+                }
+                if (this.display_bulls_eye_sign < 2) {
+                  this.restart();
+                }
+              }
+              this.display_bulls_eye_sign -= dt;
+            } else {
+              document.getElementById("bull_img").style.display="none";
+              document.getElementById("bull_font").style.display="none";
+              document.getElementById("levelup").style.display="none";
+
+              /* document.getElementById("allclear").style.display="none";*/
+              /* document.getElementById("mouse_trap").style.display = "none";*/
+            }
         }
     };
 
@@ -2325,7 +2369,6 @@ window.Test_Scene = window.classes.Test_Scene = class Test_Scene extends Scene_C
 
         this.score = 0;
         this.max_socre = 0;
-
       }
 
       make_control_panel() {
@@ -2813,7 +2856,5 @@ window.Test_Scene = window.classes.Test_Scene = class Test_Scene extends Scene_C
         }
 
         this.update_stat();
-
-
       }
     };
