@@ -386,14 +386,14 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     this.shapes.box.draw(
         graphics_state,
         identity
-            .times(Mat4.translation([-12, 0, 10]))
+            .times(Mat4.translation([-12, -1, 10]))
             .times(Mat4.scale([1.25, 1, .01])),
         this.materials.popcorn
     )
     this.shapes.box.draw(
         graphics_state,
         identity
-            .times(Mat4.translation([-13, 0, -7]))
+            .times(Mat4.translation([-13, -1, -7]))
             .times(Mat4.scale([.5, .5, .01])),
         this.materials.popcorn
     )
@@ -817,7 +817,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       document.getElementById("free_mouse").style.display = "block";
       document.getElementById("trap_mouse").style.display = "block";
       document.getElementById("free_msg").style.display = "block";
-      console.log("reached here");
     }
     if(this.mouse_pos[0][3] >= -8 && this.mouse_pos[0][3] <= 8) {
       copy = this.mouse_pos;
@@ -928,7 +927,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     }
 
     //camera coordinates
-    let translate_back = Mat4.translation(Vec.of(0, 2, 8));
+    let translate_back = Mat4.translation(Vec.of(0, 2, 15));
     if (typeof this.attached !== "undefined") {
       switch (this.attached()) {
         case this.initial_camera_location:

@@ -55,7 +55,7 @@
                         position: absolute;
                         top: 375px; left: 60%;
                         display: none">
-                        SQuEaK! Free the mouse?
+                        SQuEaK!?! Free the mouse?
                     </h1>
                     <div id="free_mouse" style="
                         width: 100px;
@@ -81,7 +81,7 @@
                         position: absolute;
                         top:500px; left: 75%;
                         display: none;
-                        cursor:pointer;" onclick="window.open('./mirror.html?clear=1', '_self');">
+                        cursor:pointer;" onclick="myFunction()">
                         <span id="no" style="font-family: fantasy; display: inline-block; line-height:50px; vertical-align:middle; font-size:20px; color: goldenrod; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">No</span>
                     </div>
 
@@ -116,6 +116,13 @@ const initialize = (Scene) => {
 
 initialize('Mirror_Scene');
 
+</script>
+<script>
+    function myFunction() {
+        document.getElementById("free_mouse").style.display = "none";
+        document.getElementById("trap_mouse").style.display = "none";
+        document.getElementById("free_msg").style.display = "none";
+    }
 </script>
 <!-- The following code embeds a code navigator widget with links to classes. //-->
 <div id="main-code" class="code-widget"></div>
