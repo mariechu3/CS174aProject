@@ -652,7 +652,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     }
     if((this.clear == 2 && this.mouse_freed == false)) {
       xpos = -8;
-      zpos = .6;
+      zpos = .4;
     }
 
     let model_transform = Mat4.identity().times(Mat4.translation([xpos, -1.9, 2+zpos]));
@@ -728,15 +728,21 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     if(this.clear==2 && (t < 9))
     {
       this.draw_mouse_two(graphics_state, t);
+      document.getElementById("okay").style.display = "none";
+      document.getElementById("Instructions").style.display = "none";
+    }
+    if(this.clear==1)
+    {
+      document.getElementById("okay").style.display = "none";
+      document.getElementById("Instructions").style.display = "none";
     }
 
 
     //this.shapes.avatar.draw(this.mycontext, graphics_state, this.avatar_pos,this.materials.avatar);
     this.draw_shadow_help(graphics_state, this.avatar_pos,1);
     this.draw_balloon_help(graphics_state,this.avatar_pos,t);
-    if(this.clear == 2 && (t < 9.009258))
-      return;
-    else if(this.clear == 2 && t > 9.009258)
+
+    if(this.clear == 2 && t > 9.009258)
       this.mouse_freed = true;
 
 

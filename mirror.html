@@ -57,6 +57,47 @@
                         display: none">
                         SQuEaK!?! Free the mouse?
                     </h1>
+                    <div id="Instructions" style="
+                        width: 1080px;
+                        height: 600px;
+                        text-align: left;
+                        background: url(https://www.ecopetit.cat/wpic/mpic/81-819291_circus-wallpapers-widescreen.jpg);
+                        background-repeat: no-repeat;
+                        background-size: 1080px 600px;
+                        color: goldenrod;
+                        font-size: 200px;
+                        position: absolute;
+                        top: 0px; left: 0%;
+                        padding: 50px;
+                        display: block;
+                        cursor:pointer;" onclick="">
+                        <span id="Instruct"
+                              style="font-family: fantasy; display: inline-block; line-height:38px; vertical-align:middle; font-size:25px; color: antiquewhite; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+                            Description: Move the girl in different directions to see how the mirror, curvature, distance and the camera angle create different visual effects. <br><br>
+                            up-left-down-right: WASD keys movements <br>
+                            closer/further to mirror: F and B <br>
+                            view whole scene: [space] <br>
+                            view middle mirror: Z <br>
+                            view left mirror: X <br>
+                            view right mirror: C <br>
+                            view the avatar: V <br>
+                            The key bindings are available in button form below the scene. </span>
+                    </div>
+                    <div id="okay" style="
+                        width: 100px;
+                        height: 50px;
+                        text-align: center;
+                        background: darkblue;
+                        color: goldenrod;
+                        font-size: 20px;
+                        position: absolute;
+                        top: 500px; left: 45%;
+                        display: block;
+                        float:left;
+                        cursor:pointer;" onclick="myFunction()";">
+                        <span id="ok" style="font-family: fantasy; display: inline-block; line-height:50px; vertical-align:middle; font-size:20px; color: white; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">Ok</span>
+                    </div>
+
                     <div id="free_mouse" style="
                         width: 100px;
                         height: 50px;
@@ -122,6 +163,8 @@ initialize('Mirror_Scene');
         document.getElementById("free_mouse").style.display = "none";
         document.getElementById("trap_mouse").style.display = "none";
         document.getElementById("free_msg").style.display = "none";
+        document.getElementById("okay").style.display = "none";
+        document.getElementById("Instructions").style.display = "none";
     }
 </script>
 <!-- The following code embeds a code navigator widget with links to classes. //-->
