@@ -992,13 +992,6 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
               Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
           );
           break;
-        case this.avatar:
-          graphics_state.camera_transform = Mat4.inverse(
-              this.avatar_pos.times(translate_back)
-          ).map((x, i) =>
-              Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
-          );
-          break;
         case this.poster_transform:
           graphics_state.camera_transform = Mat4.inverse(
               this.poster_transform.times(Mat4.translation([0,0,3]))
