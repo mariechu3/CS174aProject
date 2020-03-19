@@ -58,7 +58,52 @@
                         <h1><div style="background-color: transparent">L-R Angle: <span id="left_right_angle"></span></div></h1>
                     </div>
 
-                    <img id="bull_img" src="assets/flag.png" style="position: absolute; left: 35%; right: 50%; display: none">
+                    <div id="Instructions" style="
+                        width: 1080px;
+                        height: 600px;
+                        text-align: left;
+                        background: url(https://www.ecopetit.cat/wpic/mpic/81-819291_circus-wallpapers-widescreen.jpg);
+                        background-repeat: no-repeat;
+                        background-size: 1080px 600px;
+                        color: goldenrod;
+                        font-size: 200px;
+                        position: absolute;
+                        top: 0px; left: 0%;
+                        padding: 50px;
+                        display: block;
+                        cursor:pointer;" onclick="">
+                        <span id="Instruct"
+                              style="font-family: fantasy; display: inline-block; line-height:35px; vertical-align:middle; font-size:22px; color: antiquewhite; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+                            Description: Play a game of darts and win a mousetrap! <br><br>
+                            up-left-down-right: IJKL keys movements <br>
+                            charge power: [Enter] <br>
+                            reshoot: Q <br>
+                            view from back: 1 <br>
+                            view from angle: 2 <br>
+                            view right mirror: C <br>
+                            follow dart: / <br>
+                            change wind dir: 3 <br>
+                            add wind: 9 <br>
+                            less wind: 0 <br>
+                            The key bindings are available in button form below the scene. </span>
+                    </div>
+                    <div id="okay" style="
+                        width: 100px;
+                        height: 50px;
+                        text-align: center;
+                        background: darkblue;
+                        color: goldenrod;
+                        font-size: 20px;
+                        position: absolute;
+                        top: 520px; left: 45%;
+                        display: block;
+                        float:left;
+                        cursor:pointer;" onclick="myFunction()";">
+                    <span id="ok" style="font-family: fantasy; display: inline-block; line-height:50px; vertical-align:middle; font-size:20px; color: white; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">Ok</span>
+                </div>
+
+
+                <img id="bull_img" src="assets/flag.png" style="position: absolute; left: 35%; right: 50%; display: none">
                         <h2 id="bull_font" style="
                         font-family: fantasy;
                         color: goldenrod;
@@ -135,6 +180,12 @@ const initialize = (Scene) => {
 
 initialize('Dart_Scene');
 
+</script>
+<script>
+    function myFunction() {
+        document.getElementById("okay").style.display = "none";
+        document.getElementById("Instructions").style.display = "none";
+    }
 </script>
 <!-- The following code embeds a code navigator widget with links to classes. //-->
 <div id="main-code" class="code-widget"></div>
