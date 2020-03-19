@@ -200,7 +200,12 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         ambient: 1,
         diffusivity: 0,
         specularity: 0,
-      })
+      }),
+      dart_poster: context
+          .get_instance(Phong_Shader).material(Color.of(0,0,0,1), {
+            ambient: 1,
+            texture: context.get_instance("assets/poster.jpg", true)
+      }),
     };
     this.prev = 0;
     this.mouse_pos = Mat4.identity();
@@ -218,6 +223,9 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     ];
 
     this.move_l_pressed = this.move_r_pressed = this.move_u_pressed = this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
+
+    this.poster_transform = Mat4.identity();
+
   }
   set_pos(dir) {
     if (dir === 1)
@@ -237,6 +245,15 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     else this.avatar_pos = this.avatar_pos.times(Mat4.translation([0.5, 0, 0]));
 
     this.move_l_pressed = this.move_r_pressed = this.move_u_pressed = this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
+  }
+
+
+  show_text() {
+    if (document.getElementById("speech").style.display==="inline") {
+      document.getElementById("speech").style.display="none";
+    } else {
+      document.getElementById("speech").style.display="inline";
+    }
   }
 
   make_control_panel() {
@@ -309,7 +326,19 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         () => (this.attached = () => this.avatar_pos),
         "#FF7EA0"
     );
-   // this.new_line();
+    this.new_line();
+    this.key_triggered_button(
+        "poster",
+        ["p"],
+        () => (this.attached = () => this.poster_transform),
+        "#00815F"
+    );
+    this.key_triggered_button(
+        "Text",
+        ["i"],
+        this.show_text,
+        "#F481FF"
+    );
   }
 
   setupScene(graphics_state, t) {
@@ -590,6 +619,15 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([30,30,30])),
         this.materials.wall2
     )
+
+    this.poster_transform = Mat4.identity()
+        .times(Mat4.translation([5,-2.5,9]))
+        .times(Mat4.rotation(-1*Math.PI/2,Vec.of(1,0,0)))
+        .times(Mat4.rotation(-1*Math.PI/4,Vec.of(0,0,1)))
+        .times(Mat4.scale([1.6,2,0.01]));
+
+    this.shapes.box.draw(graphics_state, this.poster_transform, this.materials.dart_poster);
+
   }
   movement() {
     // movement of avatar
@@ -936,7 +974,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
               Vec.of(0, 0, 0),
               Vec.of(0, 1, 0)
           ).map((x, i) =>
-              Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
+              Vec.from(graphics_state.camera_transform[i]).mix(x, 0.3)
           );
           break;
         case this.mirror_1:
@@ -951,6 +989,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
         case this.avatar:
           graphics_state.camera_transform = Mat4.inverse(
               this.avatar_pos.times(translate_back)
+          ).map((x, i) =>
+              Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
+          );
+          break;
+        case this.poster_transform:
+          graphics_state.camera_transform = Mat4.inverse(
+              this.poster_transform.times(Mat4.translation([0,0,3]))
           ).map((x, i) =>
               Vec.from(graphics_state.camera_transform[i]).mix(x, 0.1)
           );

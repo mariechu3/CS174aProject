@@ -35,6 +35,30 @@
         #main-canvas {
             margin: 0 auto;
         }
+        /*Reference: https://leaverou.github.io/bubbly/*/
+        .speech-bubble {
+            position: absolute;
+            top: 200px;
+            left: 50%;
+            background: #00aabb;
+            border-radius: .4em;
+            display: none;
+        }
+
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #00aabb;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -10px;
+            margin-bottom: -20px;
+        }
     </style>
 </head>
 <body style="background: DarkGray">       <!-- Begin typing your web page here. //-->
@@ -84,7 +108,10 @@
                         cursor:pointer;" onclick="myFunction()">
                         <span id="no" style="font-family: fantasy; display: inline-block; line-height:50px; vertical-align:middle; font-size:20px; color: goldenrod; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">No</span>
                     </div>
-
+                    <hgroup id="speech" class="speech-bubble">
+                        <h2 style="font-family: fantasy">&nbsp;Noooooo, </h2>
+                        <h3 style="font-family: fantasy">&nbsp;I hate mice </h3>
+                    </hgroup>
                 </div>
             </div>
         </div>
