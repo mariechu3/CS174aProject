@@ -47,15 +47,44 @@
     <div class="carousel-inner">
         <div class="carousel-item active">
             <div id="main-canvas" class="canvas-widget" style="background-color: transparent">
-                <div id="dart_data" class="container" style="display: none; background-color: transparent">
-                    <div class="overlay" style="background-color: transparent">
-                        <h1><div style="background-color: transparent">Score: <span id="score"></span></div></h1>
-                        <h1><div style="background-color: transparent">Max Score: <span id="max_score"></span></div></h1>
-                        <h1><div style="background-color: transparent">Power: <span id="power"></span></div></h1>
-                        <h1><div style="background-color: transparent">Wind: <span id="wind"></span></div></h1>
-                        <h1><div style="background-color: transparent">Up-Down Angle: <span id="up_down_angle"></span></div></h1>
-                        <h1><div style="background-color: transparent">Left-Right Angle: <span id="left_right_angle"></span></div></h1>
+                <div id="mirror_data" class="container" style="display: none; background-color: transparent">
+                    <h1 id="free_msg" style="
+                        font-family: fantasy;
+                        color: goldenrod;
+                        font-size: 45px;
+                        position: absolute;
+                        top: 375px; left: 60%;
+                        display: none">
+                        SQuEaK! Free the mouse?
+                    </h1>
+                    <div id="free_mouse" style="
+                        width: 100px;
+                        height: 50px;
+                        text-align: center;
+                        background: #2c2c2c;
+                        color: goldenrod;
+                        font-size: 20px;
+                        position: absolute;
+                        top: 500px; left: 65%;
+                        display: none;
+                        float:left;
+                        cursor:pointer;" onclick="window.open('./mirror.html?clear=2', '_self');">
+                        <span id="yes" style="font-family: fantasy; display: inline-block; line-height:50px; vertical-align:middle; font-size:20px; color: goldenrod; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">Yes</span>
                     </div>
+                    <div id="trap_mouse" style="
+                        width: 100px;
+                        height: 50px;
+                        text-align: center;
+                        background: #2c2c2c;
+                        color: goldenrod;
+                        font-size: 20px;
+                        position: absolute;
+                        top:500px; left: 75%;
+                        display: none;
+                        cursor:pointer;" onclick="window.open('./mirror.html?clear=1', '_self');">
+                        <span id="no" style="font-family: fantasy; display: inline-block; line-height:50px; vertical-align:middle; font-size:20px; color: goldenrod; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">No</span>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -79,7 +108,7 @@ const initialize = (Scene) => {
 // themselves with this widget's Canvas_Manager so that their code can be called upon
 // every time a draw / keyboard / mouse event happens on the web page.
     new Canvas_Widget("main-canvas", scenes, true);
-    if(scenes[0]=="Dart_Scene") document.getElementById("dart_data").style.display = "block";
+    if(scenes[0]=="Mirror_Scene") document.getElementById("mirror_data").style.display = "block";
     else document.getElementById("dart_data").style.display = "none";
 // Use the Canvas_Widget class to display the WebGL demo.  Pass in
 // the name of the HTML element we are to replace with the widget.
