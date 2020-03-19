@@ -9,6 +9,13 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
           new Movement_Controls(context, control_box.parentElement.insertCell())
       );
     this.mycontext = context;
+    this.mouse_captured = false;
+    this.captured_t = 0;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    this.clear = urlParams.get('clear');
+    console.log(this.clear);
+
 
     context.globals.graphics_state.camera_transform = Mat4.look_at(
         Vec.of(0, 10, 25),
@@ -163,6 +170,12 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             diffusivity: 0,
             specularity: 0,
             texture:context.get_instance("assets/popcorn.png",true)
+          }),
+      trap: context
+          .get_instance(Phong_Shader)
+          .material(Color.of(0,0,0,1), {
+            ambient: 1,
+            texture: context.get_instance("assets/mouse_trap.png", true)
           }),
       balloon: context
           .get_instance(Phong_Shader)
@@ -383,6 +396,16 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
             .times(Mat4.scale([.5, .5, .01])),
         this.materials.popcorn
     )
+    if(this.clear==1){
+      this.shapes.box.draw(
+          graphics_state,
+          identity
+              .times(Mat4.translation([8, -2.5, 2]))
+              .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
+              .times(Mat4.scale([1, 1, 0.01])),
+          this.materials.trap
+      )
+    }
     this.shapes.box.draw(
         graphics_state,
         identity
@@ -622,13 +645,20 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
   draw_mouse_help(graphics_state,t){
     let xpos = 18*Math.sin(t*0.4);
     let zpos = .25*Math.sin(t*5);
+    if(this.mouse_captured) {
+      xpos = 18*Math.sin(this.captured_t*0.4);
+      zpos = .25*Math.sin(this.captured_t*5);
+    }
     let model_transform = Mat4.identity().times(Mat4.translation([xpos, -1.9, 2+zpos]));
     if (this.prev-xpos < 0)
       model_transform = model_transform.times(Mat4.rotation(Math.PI,[0,1,0]));
     this.shapes.mouse.draw(graphics_state,model_transform, this.materials.mouse);
     this.shapes.mouse_parts.draw(graphics_state,model_transform, this.materials.mouse_parts);
     this.shapes.mouse_eyes.draw(graphics_state,model_transform, this.materials.mouse_eyes);
-    this.tail_pos = model_transform.times(Mat4.rotation(Math.PI/8*Math.sin(t*4),[0,1,0]));
+    if(this.mouse_captured)
+      this.tail_pos = model_transform.times(Mat4.rotation(Math.PI/8*Math.sin(this.captured_t*4),[0,1,0]));
+    else
+      this.tail_pos = model_transform.times(Mat4.rotation(Math.PI/8*Math.sin(t*4),[0,1,0]));
     this.shapes.mouse_tail.draw(graphics_state,this.tail_pos,this.materials.mouse_parts);
     this.prev = xpos;
     this.mouse_pos = model_transform;
@@ -741,6 +771,11 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     }
 
     /**mouse**/
+    if(this.clear==1 && !this.mouse_captured && this.mouse_pos[0][3] >= 8) {
+      this.mouse_captured = true;
+      this.captured_t = t;
+    }
+
     if(this.mouse_pos[0][3] >= -8 && this.mouse_pos[0][3] <= 8) {
       copy = this.mouse_pos;
       reflected_mat = [
@@ -2099,6 +2134,7 @@ window.Dart_Scene= window.classes.Dart_Scene =
                       "Unlocked Level 3! \nWest Wind with speed " + Math.abs(this.accel_z).toString();
                   document.getElementById("levelup").style.display = "inline";
                 } else if (this.level === 4) {
+                  document.getElementById("mirror_btn").style.display = "block";
                   document.getElementById("allclear").style.display = "inline";
                   document.getElementById("mouse_trap").style.display = "inline";
                 }
