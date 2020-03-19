@@ -624,13 +624,13 @@ window.Canvas_Widget = window.tiny_graphics.Canvas_Widget =
         ".canvas-widget canvas { width: 1080px; height: 600px; margin-bottom:-3px }",
         ".canvas-widget div { background: white }",
         ".canvas-widget table { border-collapse: collapse; display:block; overflow-x: auto; }",
-        ".canvas-widget table.control-box { width: 1080px; border:0; margin:0; max-height:700px; transition:.5s; overflow-y:scroll; background:lightblue }", //set at 380
-        ".canvas-widget table.control-box:hover { max-height:700px }",
+        ".canvas-widget table.control-box { width: 1080px; border:0; margin:0; max-height:1500px; transition:.5s; overflow-y:scroll; background:lightblue }", //set at 380
+        ".canvas-widget table.control-box:hover { max-height:1500px }",
         ".canvas-widget table.control-box td { overflow:hidden; border:0; background:DimGray; border-radius:10px }",
-        ".canvas-widget table.control-box td .control-div { background: #ADDAE6; height:500px; padding: 5px 5px 5px 30px; box-shadow: 0px 0px 0px 0px inset }", //set at 250
+        ".canvas-widget table.control-box td .control-div { background: #ADDAE6; height:600px; padding: 5px 5px 5px 5px; box-shadow: 0px 0px 0px 0px inset }", //set at 250
         ".canvas-widget table.control-box td * { background:transparent }",
         ".canvas-widget table.control-box .control-div td { border-radius:unset }",
-        ".canvas-widget table.control-box .control-title { font-size: 30px; font-family: Brush Script MT, cursive; padding:7px 40px; color:white; background:#01A7EC; box-shadow: 25px 0px 70px -15px inset black }",
+        ".canvas-widget table.control-box .control-title { font-size: 30px; font-family: Brush Script MT, cursive; padding:7px 10px; color:white; background:#01A7EC; box-shadow: 25px 0px 70px -15px inset black }",
         ".canvas-widget *.live_string { display:inline-block; background:unset }",
         ".dropdown { display:inline-block }",
         ".dropdown-content { display:inline-block; transition:.2s; transform: scaleY(0); overflow:hidden; position: absolute; \
