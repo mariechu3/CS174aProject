@@ -400,7 +400,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
       this.shapes.box.draw(
           graphics_state,
           identity
-              .times(Mat4.translation([8, -2.5, 2]))
+              .times(Mat4.translation([-8, -2.5, 2]))
               .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
               .times(Mat4.scale([1, 1, 0.01])),
           this.materials.trap
@@ -771,7 +771,7 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
     }
 
     /**mouse**/
-    if(this.clear==1 && !this.mouse_captured && this.mouse_pos[0][3] >= 8) {
+    if(this.clear==1 && !this.mouse_captured && this.mouse_pos[0][3] <= -8) {
       this.mouse_captured = true;
       this.captured_t = t;
     }
