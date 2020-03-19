@@ -2856,5 +2856,6 @@ window.Test_Scene = window.classes.Test_Scene = class Test_Scene extends Scene_C
         }
 
         this.update_stat();
+
       }
     };
