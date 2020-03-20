@@ -11,11 +11,12 @@ Yijing Zhou (404786693)
 Marie Chu & Yijing Zhou
 
 #####Brief Description
-This scene simulates funhouses mirrors at the carnival, including a plane mirror, concave mirror, and convex mirror. 
+This scene simulates funhouses mirrors at the carnival, including a plane mirror, concave mirror, and convex mirror.  
 Using the mirror equation: 
 ![Image description](https://www.physicstutorials.org/images/stories/mirrorequations2.png)
+The player can move around the with arrow keys as a mouse scuttles by.
 
-![Image](mirror.png)
+![Image](mirror.jpg)
 
 #####Advanced Features
 This scene includes advanced features such as reflections. With the plane mirror the magnification of the 
@@ -26,13 +27,16 @@ left mirror (convex) the image is always upright, reduced and virtual.
 Another feature in this scene is shadowing. The avatar's shadow becomes elongated as the object moves further from the 
 light source and larger as the object gets closer to the light source in the upwards direction.
 
+There is also simple collision detection to make sure the user does not go through the walls when moving avatars position.
+
 
 
 ####*Darts:*
 Su Yong Won & Changhui Youn
 #####Brief Description
-This scene simulates a Dart game in which a user can aim and shoot at a target. It simulates the effect of wind and gravity on the path of the projectile. There is also a descriptor box that keeps track of the score and additional descriptors for the shot such as wind speed, direction, etc. If the user hits a bulls-eye, fireworks will go off.
-![Image](dart.png)
+This scene simulates a Dart game in which a user can aim and shoot at a target. It simulates the effect of wind and gravity on the path of the projectile. There is also a descriptor box that keeps track of the score and additional descriptors for the shot such as wind speed, direction, etc. If the user hits a bulls-eye, fireworks will go off. After completing 3 levels, the user will receive a mousetrap that they can use to trap the mouse in the mirror room.
+
+![Image](dart.jpg)
 
 
 
