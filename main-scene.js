@@ -228,21 +228,24 @@ window.Mirror_Scene = window.classes.Mirror_Scene = class Mirror_Scene extends S
 
   }
   set_pos(dir) {
-    if (dir === 1)
-      this.avatar_pos = this.avatar_pos.times(Mat4.translation([-0.5, 0, 0]));
+    if (dir === 1) {
+      if (this.avatar_pos[0][3] > -29)
+        this.avatar_pos = this.avatar_pos.times(Mat4.translation([-0.5, 0, 0]));
+    }
     else if (dir === 2)
       this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0.5, 0]));
     else if (dir === 3) {
-      if (this.avatar_pos[1][3] > 0)
+      if (this.avatar_pos[1][3] > 0) //this is ground
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, -0.5, 0]));
     } else if (dir === 4) {
-      if (this.avatar_pos[2][3] > 1.5)
+      if (this.avatar_pos[2][3] > 1.5) //this is mirror
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, -0.5]));
     } else if (dir === 5){
-      if (this.avatar_pos[2][3] < 29.0)
+      if (this.avatar_pos[2][3] < 29.0) //this is back wall
         this.avatar_pos = this.avatar_pos.times(Mat4.translation([0, 0, 0.5]));
       }
-    else this.avatar_pos = this.avatar_pos.times(Mat4.translation([0.5, 0, 0]));
+    else if (this.avatar_pos[0][3] < 29)
+      this.avatar_pos = this.avatar_pos.times(Mat4.translation([0.5, 0, 0]));
 
     this.move_l_pressed = this.move_r_pressed = this.move_u_pressed = this.move_d_pressed = this.move_f_pressed = this.move_b_pressed = false;
   }
